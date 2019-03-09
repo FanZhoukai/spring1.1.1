@@ -1,0 +1,1101 @@
+<?xml version="1.0"?>
+
+<!--
+  Build file for the Spring Framework.
+
+  This script requires a "lib" directory containing the necessary third party JAR files.
+  See project.properties for the definitions of the properties used in this file.
+
+  Building Spring requires J2SE 1.4; the "dist" JARs are built with Sun's JDK 1.4.2.
+  Note: To successfully run the tests, you need to use Xerces or any other JAXP parser
+  that properly supports XML includes. A simple way to achieve this is to put
+  xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
+-->
+
+<project name="spring-core" default="usage" basedir=".">
+
+	<property file="build.properties"/>
+	<property file="project.properties"/>
+
+
+	<path id="all-libs">
+
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+			<!-- Exclude ibatis-common-2, because it conflicts with ibatis-common. -->
+			<!-- The former is not needed for building the framework, but the latter is. -->
+			<exclude name="ibatis/ibatis-common-2.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<path id="attribute-compiler-classpath">
+
+		<fileset dir="lib/jakarta-commons">
+			<include name="commons-attributes-compiler.jar"/>
+			<include name="commons-collections.jar"/>
+		</fileset>
+		<fileset dir="lib/xdoclet">
+			<include name="xjavadoc-1.0.jar"/>
+		</fileset>
+
+	</path>
+
+
+	<target name="usage">
+
+		<echo message=""/>
+		<echo message="${name} build file"/>
+		<echo message="------------------------------------------------------"/>
+		<echo message=""/>
+		<echo message="Among the available targets are:"/>
+		<echo message=""/>
+		<echo message="build    --> build all; don't create JARs"/>
+		<echo message="alljars  --> create all JAR files"/>
+		<echo message="tests    --> run tests"/>
+		<echo message=""/>
+
+	</target>
+
+
+	<target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc.)">
+
+		<delete dir="${dist.dir}"/>
+		<delete dir="${javadocs.dir}"/>
+
+		<delete dir="${target.classes.dir}"/>
+		<delete dir="${target.testclasses.dir}"/>
+		<delete dir="${target.mockclasses.dir}"/>
+		<delete dir="${target.clover.dir}"/>
+		<delete dir="${target.junit.reports.dir}"/>
+		<delete dir="${target.junit.summary.dir}"/>
+		<delete dir="${target.release.dir}"/>
+		<delete dir="${target.loadclasses.dir}"/>
+		<delete dir="${target.otherclasses.dir}"/>
+
+		<!-- just kill target dir (it's safer). No need at this point to keep it -->
+		<delete dir="${target.dir}"/>
+
+	</target>
+
+
+	<!--
+		Use Jakarta Commons Attributes to compile the attributes for the main source tree.
+	-->
+	<target name="compileattr">
+
+	 	<!-- Bring in Jakarta Commons attribute compilation -->
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+		  <classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
+
+		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
+	 	 	<!--
+	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
+	 	 	package currently needs to be shipped with an attribute, to support indexing.
+	 	  -->
+			<fileset dir="${src.dir}" includes="**/metadata/*.java"/>
+		</attribute-compiler>
+
+ 	</target>
+
+
+	<!--
+		Compile the main source tree.
+		This task depends on the Commons Attributes compile step,
+		as some classes must ship with attributes.
+	-->
+	<target name="build" depends="compileattr" description="Compile main source tree java files into class files">
+
+		<mkdir dir="${target.classes.dir}"/>
+		<mkdir dir="${target.classes.dir}/META-INF"/>
+
+		<javac destdir="${target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<!-- Include Commons Attributes generated Java sources -->
+			<src path="${commons.attributes.tempdir.src}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+		<rmic base="${target.classes.dir}" classname="org.springframework.remoting.rmi.RmiInvocationWrapper"/>
+
+		<copy todir="${target.classes.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.ftl"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${target.classes.dir}/META-INF" preservelastmodified="true">
+			<fileset dir="${src.dir}/org/springframework/web/servlet/tags">
+				<include name="*.tld"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="initdist" description="Initialize the distribution directory">
+
+		<mkdir dir="${dist.dir}"/>
+
+	</target>
+
+
+	<target name="modulejars" depends="build,initdist" description="Create module-specific JAR files">
+
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="spring-*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/spring-core.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/beans/**"/>
+				<include name="org/springframework/core/**"/>
+				<include name="org/springframework/util/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-aop.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/metadata/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-context.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/cache/**"/>
+				<include name="org/springframework/context/**"/>
+				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/jms/**"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/mail/**"/>
+				<include name="org/springframework/remoting/**"/>
+				<include name="org/springframework/scheduling/**"/>
+				<include name="org/springframework/ui/**"/>
+				<include name="org/springframework/validation/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-dao.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/jdbc/**"/>
+				<include name="org/springframework/transaction/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-orm.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-web.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/web/**"/>
+				<exclude name="org/springframework/web/servlet/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/spring-webmvc.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
+				<include name="org/springframework/web/servlet/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="fulljar" depends="build,initdist" description="Create full JAR file with all Spring classes">
+
+		<delete file="${dist.dir}/spring.jar"/>
+
+		<jar jarfile="${dist.dir}/spring.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="buildmock" depends="build" description="Compile mock source tree Java files into class files">
+
+		<mkdir dir="${target.mockclasses.dir}"/>
+
+		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${mock.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.mockclasses.dir}" preservelastmodified="true">
+			<fileset dir="${mock.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="mockjar" depends="buildmock,initdist" description="Create JAR file with Spring mock classes">
+
+		<delete file="${dist.dir}/spring-mock.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-mock.jar">
+			<fileset dir="${target.mockclasses.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="srczip" depends="initdist" description="Create source ZIP (containing all Java sources)">
+
+		<delete file="${dist.dir}/spring-src.zip"/>
+
+		<zip zipfile="${dist.dir}/spring-src.zip">
+			<fileset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
+		</zip>
+
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
+				todir="${dist.dir}" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
+				todir="${dist.dir}" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/web/servlet/view/velocity/spring.vm"
+				todir="${dist.dir}" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
+				todir="${dist.dir}" preservelastmodified="true"/>
+
+	</target>
+
+
+	<target name="alljars" depends="modulejars,fulljar,mockjar,srczip" description="Create all JAR files"/>
+
+
+	<!--
+		Convenience targets, needed for the automated build process. Convenience targets are
+		made up of the individual targets called, separated by an underscore.
+	-->
+	<target name="clean_alljars" depends="clean, alljars"/>
+
+
+	<target name="javadoc" description="Generate framework Javadocs.">
+
+		<mkdir dir="${javadocs.dir}"/>
+
+		<javadoc sourcepath="${src.dir}" destdir="${javadocs.dir}" windowtitle="Spring Framework"
+				source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
+			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright (C) 2003-2004 The Spring Framework Project.</i>]]></bottom>
+			<classpath refid="all-libs"/>
+			<packageset dir="${src.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+			<packageset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
+		</javadoc>
+
+	</target>
+
+
+	<target name="release" depends="alljars,javadoc,refdoc" description="Generate release zip file">
+
+		<mkdir dir="${target.release.dir}"/>
+
+		<delete file="${target.release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
+
+		<fileset id="main" dir=".">
+			<include name="dist/*.jar"/>
+			<include name="dist/*.dtd"/>
+			<include name="dist/*.tld"/>
+			<include name="dist/*.vm"/>
+			<include name="dist/*.ftl"/>
+			<include name="docs/**"/>
+			<exclude name="docs/reference/images/**"/>
+			<exclude name="docs/reference/src/**"/>
+			<exclude name="docs/reference/styles/**"/>
+			<exclude name="docs/reference/.cvsignore"/>
+			<exclude name="docs/reference/readme.txt"/>
+			<exclude name="docs/reference/lib/**"/>
+			<exclude name="docs/reference/html/**"/>
+			<exclude name="docs/reference/pdf/images/**"/>
+			<include name="samples/countries/**"/>
+			<include name="samples/imagedb/**"/>
+			<include name="samples/jpetstore/**"/>
+			<include name="samples/petclinic/**"/>
+			<include name="samples/tiles-example/**"/>
+			<include name="samples/webapp-minimal/**"/>
+			<include name="samples/webapp-typical/**"/>
+			<include name="mock/**"/>
+			<include name="src/**"/>
+			<include name="test/**"/>
+			<include name="*.bat"/>
+			<include name="*.txt"/>
+			<include name="*.xml"/>
+			<include name="*.properties"/>
+		</fileset>
+
+		<zip zipfile="${target.release.dir}/${release.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+		</zip>
+
+		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset dir="." prefix="${release.path}">
+				<include name="lib/*.txt"/>
+				<include name="lib/ant/**"/>
+				<include name="lib/axis/**"/>
+				<include name="lib/aopalliance/**"/>
+				<include name="lib/caucho/**"/>
+				<include name="lib/cglib/**"/>
+				<include name="lib/cos/**"/>
+				<include name="lib/dom4j/**"/>
+				<include name="lib/easymock/**"/>
+				<include name="lib/ehcache/**"/>
+				<include name="lib/freemarker/**"/>
+				<include name="lib/hibernate/**"/>
+				<include name="lib/hsqldb/**"/>
+				<include name="lib/ibatis/**"/>
+				<include name="lib/itext/**"/>
+				<include name="lib/jakarta-commons/**"/>
+				<include name="lib/jakarta-taglibs/**"/>
+				<include name="lib/j2ee/**"/>
+				<include name="lib/jdo/**"/>
+				<include name="lib/jdom/**"/>
+				<include name="lib/jotm/**"/>
+				<include name="lib/jsf/**"/>
+				<include name="lib/junit/**"/>
+				<include name="lib/log4j/**"/>
+				<include name="lib/ojb/**"/>
+				<include name="lib/oro/**"/>
+				<include name="lib/poi/**"/>
+				<include name="lib/quartz/**"/>
+				<include name="lib/struts/**"/>
+				<include name="lib/velocity/**"/>
+				<include name="lib/xdoclet/**"/>
+			</zipfileset>
+		</zip>
+
+	</target>
+
+
+	<target name="clean_release" depends="clean, release"/>
+
+
+ 	<target name="compiletestattr" depends="buildmock">
+
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+		  <classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
+
+	 	<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
+			<fileset dir="${test.dir}" includes="**/autoproxy/metadata/*.java"/>
+		</attribute-compiler>
+
+ 	</target>
+
+
+	<!--
+		This task depends on the Commons Attributes compile step,
+		as some tests require source-level attribute support.
+	-->
+	<target name="buildtests" depends="compiletestattr" description="Compile test source tree java files into class files">
+
+		<mkdir dir="${target.testclasses.dir}"/>
+
+		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${test.dir}"/>
+			<!-- Include Commons Attributes generated Java sources -->
+			<src path="${commons.attributes.tempdir.test}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${test.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Run test suite. This and clover.tests take their includes and excludes from
+		build.properties. However it's possible to run specific tests by passing in
+		the test.includes and (optionally) test.excludes properties through the
+		command line, as below:
+			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
+	-->
+	<target name="tests" depends="buildtests" description="Run tests">
+
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+							includes="${test.includes}"
+							excludes="${test.excludes}">
+					<exclude name="**/JmsTemplate102Tests.class"/>
+					<exclude name="**/JmsTemplate11Tests.class"/>
+					<exclude name="**/TransactionTestSuite.class"/>
+				</fileset>
+
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/JmsTemplate102Tests.class"
+						excludes="${test.excludes}"/>
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/JmsTemplate11Tests.class"
+						excludes="${test.excludes}"/>
+			</batchtest>
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}"
+						includes="**/TransactionTestSuite.class"/>
+			</batchtest>
+		</junit>
+
+	</target>
+
+
+	<target name="clean_tests" depends="clean, tests"/>
+
+
+	<!--
+		Run test suite and generate test summary.
+		Does not halt on failure or error, in contrast to the "tests" target above.
+	-->
+	<target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
+
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+		<property name="summary.dir" value="${target.junit.summary.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+		<mkdir dir="${summary.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+		<junitreport todir="${reports.dir}">
+
+			<fileset dir="${reports.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${summary.dir}"/>
+
+		</junitreport>
+
+	</target>
+
+
+	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
+
+		<!-- switch on Clover by specifying it as the compiler to use -->
+		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
+
+		<mkdir dir="${target.clover.dir}"/>
+
+		<javac destdir="${target.clover.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}"/>
+			<classpath refid="all-libs"/>
+		</javac>
+
+		<copy todir="${target.clover.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<target name="clover.tests" depends="buildtests,clover.build" description="Run Clover tests">
+
+		<property name="reports.dir" value="${target.junit.reports.dir}"/>
+
+		<mkdir dir="${reports.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<!-- Must go first to ensure the jndi.properties takes precedence  -->
+			<classpath location="${target.testclasses.dir}"/>
+			<classpath location="${target.mockclasses.dir}"/>
+			<classpath location="${target.clover.dir}"/>
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${reports.dir}">
+				<fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis, and bring up
+		Clover's Swing browser to display the results.
+	-->
+	<target name="clover.swing" depends="clover.tests" description="Run Clover tests and launch Swing coverage viewer">
+
+		<echo>Launching Clover coverage viewer</echo>
+
+		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
+			<arg value="${clover.initstring}"/>
+			<classpath refid="all-libs"/>
+		</java>
+
+	</target>
+
+
+	<!--
+		Run test suite under Clover coverage analysis, and use Clover
+		to generate Javadoc/style HTML results that may be browsed later.
+	-->
+	<target name="clover.html" depends="clover.tests" description="Run Clover tests and generate HTML coverage reports">
+
+		<java classname="com.cortexeb.tools.clover.reporters.html.HtmlReporter" fork="yes">
+			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework'"/>
+			<classpath refid="all-libs"/>
+		</java>
+
+	</target>
+
+
+	<target name="docclean" description="Delete temporary and distribution directories for docs">
+
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/pdf"/>
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html_single"/>
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}/html"/>
+
+	</target>
+
+
+	<target name="preparedocs" description="Extra preparation for the documentation">
+
+		<fail message="XSLT supporting lib not installed. Please see docs/reference/readme.txt for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+
+		<!-- For now, no dynamic inclusion of the DTD since it looks ugly because of
+		     all the extra newlines the replace is mysteriously adding.
+		     I'll figure something out for that later on
+		<delete file="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
+		<loadfile
+			property="doc.beansdtd"
+				srcFile="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"/>
+		<copy
+			file="${basedir}/${doc.ref.dir}/src/dtd-template.xml"
+			tofile="${basedir}/${doc.ref.dir}/src/dtd.xml"/>
+		<replace
+			file="${basedir}/${doc.ref.dir}/src/dtd.xml"
+			token="@dtd-include@"
+			value="${doc.beansdtd}">
+		</replace>
+		<replace
+			file="${basedir}/${doc.ref.dir}/src/dtd.xml"
+			token="\\n"
+			value=""/>
+		-->
+	</target>
+
+
+	<target name="docpdf" depends="preparedocs" description="Compile reference documentation to pdf">
+
+		<mkdir dir="${basedir}/${dist.ref.dir}/pdf/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+		</java>
+
+		<java classname="org.apache.fop.apps.Fop" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.ref.dir}/pdf/spring-reference.pdf"/>
+		</java>
+
+		<delete file="${dist.ref.dir}/pdf/docbook_fop.tmp"/>
+
+	</target>
+
+
+	<target name="dochtml" depends="preparedocs" description="Compile reference documentation to chunked html">
+
+		<mkdir dir="${dist.ref.dir}/html/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="dochtmlsingle" description="Compile reference documentation to single html">
+
+		<mkdir dir="${dist.ref.dir}/html_single/images"/>
+
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.ref.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.dir}/reference/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.ref.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/html.xsl"/>
+		</java>
+
+	</target>
+
+	<target name="refdoc" depends="dochtml,dochtmlsingle,docpdf" description="Generate and copy reference documentation"/>
+
+
+	<target name="build-sandbox" description="Compile sandbox source tree java files into class files">
+
+		<echo message="WARNING: To keep things speedy, there's no Ant-dependency on the build-target"/>
+		<mkdir dir="${sandbox.target.classes.dir}"/>
+		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
+
+		<javac destdir="${sandbox.target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${sandbox.src.dir}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+		</javac>
+
+		<copy todir="${sandbox.target.classes.dir}" preservelastmodified="true">
+			<fileset dir="${sandbox.src.dir}">
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${sandbox.target.classes.dir}/META-INF" preservelastmodified="true">
+			<fileset dir="${sandbox.src.dir}/org/springframework/validation/commons/taglib">
+				<include name="*.tld"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Use Jakarta Commons Attributes to compile the attributes for the sandbox test tree.
+	-->
+	<target name="compileattr-sandbox-tests">
+
+	 	<!-- Bring in Jakarta Commons attribute compilation -->
+		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
+		  <classpath refid="attribute-compiler-classpath"/>
+		</taskdef>
+
+		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<attribute-compiler destdir="${commons.attributes.tempdir.sandbox.test}" >
+
+			<fileset dir="${sandbox.test.dir}" includes="**/*.java"/>
+		</attribute-compiler>
+
+ 	</target>
+
+
+	<target name="buildtests-sandbox" depends="buildtests, compileattr-sandbox-tests"
+			description="Compile test source tree Java files into class files">
+
+		<mkdir dir="${sandbox.target.testclasses.dir}"/>
+
+		<javac destdir="${sandbox.target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="true">
+			<src path="${sandbox.test.dir}"/>
+			<src path="${commons.attributes.tempdir.sandbox.test}"/>
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+		    <classpath location="${target.mockclasses.dir}"/>
+		</javac>
+
+		<!-- Pick up logging config from test directory -->
+		<copy todir="${sandbox.target.testclasses.dir}" preservelastmodified="true">
+			<fileset dir="${sandbox.test.dir}">
+				<include name="**/*.properties"/>
+			</fileset>
+			<fileset dir="${sandbox.test.dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+
+	</target>
+
+
+	<!--
+		Run test suite. This and Clover test target take their includes and excludes
+		from build.properties. However it's possible to run specific tests by passing in
+		the test.includes and (optionally) test.excludes properties through the command line, as below:
+			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
+	-->
+	<target name="tests-sandbox" depends="build-sandbox,buildtests-sandbox" description="Run tests">
+
+		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+
+		<mkdir dir="${sandbox.reports.dir}"/>
+
+		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${sandbox.target.testclasses.dir}"/>
+			<classpath location="${sandbox.target.classes.dir}"/>
+			<classpath location="${target.testclasses.dir}"/>
+		    <classpath location="${target.mockclasses.dir}"/>
+			    
+			<!-- Need files loaded as resources -->
+			<classpath location="${sandbox.test.dir}"/>
+
+			<classpath refid="all-libs"/>
+			<classpath location="${target.classes.dir}"/>
+
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml"/>
+
+			<batchtest fork="yes" todir="${sandbox.reports.dir}">
+				<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+			</batchtest>
+
+		</junit>
+
+	</target>
+	
+	<target name="test-sandbox-summary" depends="build-sandbox,buildtests-sandbox" description="Run tests and generate test summary">
+	
+			<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
+
+			<mkdir dir="${sandbox.reports.dir}"/>
+					
+			<property name="reports.dir" value="${sandbox.reports.dir}"/>
+			<property name="summary.dir" value="${sandbox.reports.dir}/reports"/>
+
+			<mkdir dir="${reports.dir}"/>
+			<mkdir dir="${summary.dir}"/>
+
+			<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+
+				<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+				<classpath location="${sandbox.target.testclasses.dir}"/>
+				<classpath location="${sandbox.target.classes.dir}"/>
+				<classpath location="${target.testclasses.dir}"/>
+			    <classpath location="${target.mockclasses.dir}"/>
+				<!-- Need files loaded as resources -->
+				<classpath location="${sandbox.test.dir}"/>
+
+				<classpath refid="all-libs"/>
+				<classpath location="${target.classes.dir}"/>
+
+				<formatter type="plain" usefile="false"/>
+				<formatter type="xml"/>
+
+				<batchtest fork="yes" todir="${reports.dir}">
+					<fileset dir="${sandbox.target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+				</batchtest>
+
+			</junit>
+
+			<junitreport todir="${reports.dir}">
+
+				<fileset dir="${reports.dir}">
+					<include name="TEST-*.xml"/>
+				</fileset>
+				<report todir="${summary.dir}"/>
+
+			</junitreport>
+
+		</target>
+
+
+	<target name="sandboxjar" depends="build,build-sandbox,initdist" description="Create jar with sandbox classes">
+
+		<delete file="${dist.dir}/spring-sandbox.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-sandbox.jar">
+			<fileset dir="${sandbox.target.classes.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="loadjar" depends="initdist, buildtests" description="Build load test jar">
+
+		<mkdir dir="${target.loadclasses.dir}"/>
+
+		<javac destdir="${target.loadclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+				deprecation="false" optimize="false" failonerror="false">
+
+			<src path="${load.dir}"/>
+
+			<classpath refid="all-libs"/>
+
+			<!-- For load -->
+			<classpath location="${target.classes.dir}"/>
+
+			<classpath location="${target.testclasses.dir}"/>
+
+		</javac>
+
+		<copy todir="${target.loadclasses.dir}" preservelastmodified="true">
+			<fileset dir="load">
+				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+
+		<jar jarfile="${dist.dir}/${spring-load.jar}">
+			<fileset dir="${target.loadclasses.dir}">
+				<include name="org/springframework/load/**" />
+			</fileset>
+		</jar>
+
+	</target>
+
+
+	<!--
+		 targets for the automated build
+		 @author Alef Arendsen
+
+		 'mb' runs all the automated build tests and is supposed to be expanded further
+		 'mb-server-tests' runs all the servers tests
+		 'mb-publish' publishes the results from the server tests
+	-->
+	<target name="mb" depends="clean, build, fulljar, tests, mb-server-tests, mb-publish"/>
+
+
+	<target name="mb-server-tests">
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="tomcat4"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="tomcat5"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="buildtest"/>
+			<property name="target.server" value="jetty4"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat4"/>
+		</ant>
+
+		<ant dir="${basedir}/autobuilds/build" target="main" inheritall="false">
+			<property name="autobuild.nospringbuild" value="true"/>
+			<property name="target.app" value="jpetstore"/>
+			<property name="target.server" value="tomcat5"/>
+			<property name="autobuild.nomail" value="true"/>
+		</ant>
+
+	</target>
+
+
+	<target name="mb-publish">
+		<tstamp>
+			<format pattern="yyyy-MM-dd" property="tstamp.servertests"/>
+		</tstamp>
+		<copy todir="${target.junit.reports.dir}">
+			<fileset dir="${target.dir}/autobuilds/reports">
+				<include name="*unittests_${tstamp.servertests}.xml"/>
+			</fileset>
+		</copy>
+		<mkdir dir="${target.junit.reports.html.dir}"/>
+		<junitreport todir="${target.junit.reports.html.dir}">
+			<fileset dir="${target.junit.reports.dir}">
+				<include name="*.xml"/>
+			</fileset>
+			<report format="frames" todir="${target.junit.reports.html.dir}"/>
+		</junitreport>
+	</target>
+
+</project>

@@ -1,0 +1,68 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/ant" />
+      <root url="file://$PROJECT_DIR$/lib/aopalliance" />
+      <root url="file://$PROJECT_DIR$/lib/axis" />
+      <root url="file://$PROJECT_DIR$/lib/caucho" />
+      <root url="file://$PROJECT_DIR$/lib/cglib" />
+      <root url="file://$PROJECT_DIR$/lib/cos" />
+      <root url="file://$PROJECT_DIR$/lib/dom4j" />
+      <root url="file://$PROJECT_DIR$/lib/easymock" />
+      <root url="file://$PROJECT_DIR$/lib/ehcache" />
+      <root url="file://$PROJECT_DIR$/lib/freemarker" />
+      <root url="file://$PROJECT_DIR$/lib/hibernate" />
+      <root url="file://$PROJECT_DIR$/lib/hsqldb" />
+      <root url="file://$PROJECT_DIR$/lib/ibatis" />
+      <root url="file://$PROJECT_DIR$/lib/itext" />
+      <root url="file://$PROJECT_DIR$/lib/j2ee" />
+      <root url="file://$PROJECT_DIR$/lib/jakarta-commons" />
+      <root url="file://$PROJECT_DIR$/lib/jakarta-taglibs" />
+      <root url="file://$PROJECT_DIR$/lib/jdo" />
+      <root url="file://$PROJECT_DIR$/lib/jdom" />
+      <root url="file://$PROJECT_DIR$/lib/jotm" />
+      <root url="file://$PROJECT_DIR$/lib/jsf" />
+      <root url="file://$PROJECT_DIR$/lib/junit" />
+      <root url="file://$PROJECT_DIR$/lib/log4j" />
+      <root url="file://$PROJECT_DIR$/lib/ojb" />
+      <root url="file://$PROJECT_DIR$/lib/oro" />
+      <root url="file://$PROJECT_DIR$/lib/poi" />
+      <root url="file://$PROJECT_DIR$/lib/quartz" />
+      <root url="file://$PROJECT_DIR$/lib/struts" />
+      <root url="file://$PROJECT_DIR$/lib/velocity" />
+      <root url="file://$PROJECT_DIR$/lib/xdoclet" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/ant" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/aopalliance" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/axis" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/caucho" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/cglib" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/cos" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/dom4j" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/easymock" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/ehcache" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/freemarker" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/hibernate" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/hsqldb" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/ibatis" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/itext" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/j2ee" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jakarta-commons" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jakarta-taglibs" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jdo" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jdom" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jotm" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/jsf" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/junit" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/log4j" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/ojb" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/oro" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/poi" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/quartz" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/struts" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/velocity" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/xdoclet" recursive="false" />
+  </library>
+</component>
