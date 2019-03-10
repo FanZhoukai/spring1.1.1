@@ -45,6 +45,9 @@ import org.springframework.context.ApplicationContext;
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
+	/**
+	 * 配置文件路径位置
+	 */
 	private String[] configLocations;
 
 	/**

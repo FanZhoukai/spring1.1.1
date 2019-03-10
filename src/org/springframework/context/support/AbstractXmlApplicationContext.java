@@ -38,7 +38,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
 
-	/** Bean factory for this context */
+	/**
+	 * 当前上下文的beanFactory
+	 * beanFactory用于创建bean，是IoC容器内全局的bean工厂
+	 */
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**
@@ -55,6 +58,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 		super(parent);
 	}
 
+	/**
+	 * 刷新（构造）beanFactory对象
+	 * 该方法会在所有初始化工作之前被调用
+	 */
 	protected final void refreshBeanFactory() throws BeansException {
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
@@ -68,11 +75,13 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException(
-					"I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
+			throw new ApplicationContextException("I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
 		}
 	}
 
+	/**
+	 * 获取beanFactory对象
+	 */
 	public final ConfigurableListableBeanFactory getBeanFactory() {
 		return beanFactory;
 	}

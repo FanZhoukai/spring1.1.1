@@ -48,13 +48,13 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
 
-	/* Whether to allow re-registration of a different definition with the same name */
+	/* 是否允许重复注册bean */
 	private boolean allowBeanDefinitionOverriding = true;
 
-	/** Map of bean definition objects, keyed by bean name */
+	/** bean定义对象map，结构：Map<String,BeanDefinition> */
 	private final Map beanDefinitionMap = new HashMap();
 
-	/** List of bean definition names, in registration order */
+	/** bean名称列表，按注册顺序排序 */
 	private final List beanDefinitionNames = new LinkedList();
 
 
@@ -95,8 +95,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Note that this method is slow. Don't invoke it too often:
-	 * it's best used only in application initialization.
+	 * 找到符合指定类型的所有bean名称
+	 * 符合类型是指，属于指定类及其子类，或是指定接口的实现类
 	 */
 	public String[] getBeanDefinitionNames(Class type) {
 		List matches = new ArrayList();
@@ -111,11 +111,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Determine whether the bean definition with the given name matches
-	 * the given type.
-	 * @param beanName the name of the bean to check
-	 * @param type class or interface to match, or null for all bean names
-	 * @return whether the type matches
+	 * 判断bean名称对应的bean类型，是否属于给定的类及其子类（或给定接口的实现类）
 	 */
 	protected boolean isBeanDefinitionTypeMatch(String beanName, Class type) {
 		if (type == null) {
@@ -256,33 +252,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
-	public void registerBeanDefinition(String name, BeanDefinition beanDefinition)
-			throws BeanDefinitionStoreException {
+	/**
+	 * 将bean实例注册进beanFactory中
+	 * 当前对象就是beanFactory，即注册进当前对象的beanDefinitionMap中
+	 */
+	public void registerBeanDefinition(String name, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+		// bean定义验证
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
 			}
 			catch (BeanDefinitionValidationException ex) {
-				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name,
-				                                       "Validation of bean definition with name failed", ex);
+				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), name, "Validation of bean definition with name failed", ex);
 			}
 		}
+		// 若已有重名的bean定义，验证是否允许覆盖
 		Object oldBeanDefinition = this.beanDefinitionMap.get(name);
 		if (oldBeanDefinition != null) {
 			if (!this.allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException("Cannot register bean definition [" + beanDefinition + "] for bean '" +
-																							 name + "': there's already [" + oldBeanDefinition + "] bound");
+				throw new BeanDefinitionStoreException("Cannot register bean definition [" + beanDefinition + "] for bean '" + name + "': there's already [" + oldBeanDefinition + "] bound");
 			}
-			else {
-				if (logger.isInfoEnabled()) {
-					logger.info("Overriding bean definition for bean '" + name +
-											"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
-				}
-			}
-		}
-		else {
+		} else {
 			this.beanDefinitionNames.add(name);
 		}
+		// 注册进map中
 		this.beanDefinitionMap.put(name, beanDefinition);
 	}
 

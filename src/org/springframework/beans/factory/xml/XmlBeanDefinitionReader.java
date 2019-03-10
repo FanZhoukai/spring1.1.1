@@ -39,6 +39,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 
 /**
+ * bean定义读取工具类
+ *
  * Bean definition reader for Spring's default XML bean definition format.
  * Typically applied to a DefaultListableBeanFactory.
  *
@@ -102,9 +104,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Load bean definitions from the specified XML file.
-	 * @param resource the resource descriptor for the XML file
-	 * @throws BeansException in case of loading or parsing errors
+	 * 从指定xml文件中读取bean定义信息
 	 */
 	public int loadBeanDefinitions(Resource resource) throws BeansException {
 		if (resource == null) {
@@ -119,12 +119,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JAXP implementation [" + factory + "]");
 			}
+			// 读取xml，将其中的信息转为内存中的Document对象
 			factory.setValidating(this.validating);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new BeansErrorHandler());
 			docBuilder.setEntityResolver(this.entityResolver != null ? this.entityResolver : new BeansDtdResolver());
 			is = resource.getInputStream();
 			Document doc = docBuilder.parse(is);
+
+			// 根据bean定义信息，注册bean实例
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
@@ -153,11 +156,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Register the bean definitions contained in the given DOM document.
-	 * All calls go through this.
-	 * @param doc the DOM document
-	 * @param resource the resource descriptor (for context information)
-	 * @throws BeansException in case of parsing errors
+	 * 注册DOM内的bean定义
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
 		XmlBeanDefinitionParser parser = (XmlBeanDefinitionParser) BeanUtils.instantiateClass(this.parserClass);

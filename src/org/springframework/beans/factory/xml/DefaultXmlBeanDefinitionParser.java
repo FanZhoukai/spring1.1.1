@@ -150,9 +150,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 
 	private String defaultAutowire;
 
-
-	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
-			throws BeansException {
+	/**
+	 * 转化DOM中的bean定义，并注册进指定的beanFactory中。
+	 * beanFactory包含在参数reader中。
+	 */
+	public int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource) throws BeansException {
 		this.beanDefinitionReader = reader;
 		this.resource = resource;
 
@@ -166,15 +168,18 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
 		logger.debug("Default autowire '" + this.defaultAutowire + "'");
 
+		// 解析xml
 		NodeList nl = root.getChildNodes();
 		int beanDefinitionCounter = 0;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element) {
 				Element ele = (Element) node;
+				// 引入的外部文件
 				if (IMPORT_ELEMENT.equals(node.getNodeName())) {
 					importBeanDefinitionResource(ele);
 				}
+				// bean定义节点
 				else if (BEAN_ELEMENT.equals(node.getNodeName())) {
 					beanDefinitionCounter++;
 					registerBeanDefinition(ele);
@@ -223,17 +228,18 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	/**
-	 * Parse a "bean" element and register it with the bean factory.
+	 * 处理一个bean定义DOM节点，并将其注册进BeanFactory中
 	 */
 	protected void registerBeanDefinition(Element ele) {
 		BeanDefinitionHolder bdHolder = parseBeanDefinition(ele);
-		logger.debug("Registering bean definition with id '" + bdHolder.getBeanName() + "'");
-		this.beanDefinitionReader.getBeanFactory().registerBeanDefinition(
-				bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+
+		// bean定义注册进beanFactory中
+		this.beanDefinitionReader.getBeanFactory().registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+
+		// 处理bean定义的别名
 		if (bdHolder.getAliases() != null) {
 			for (int i = 0; i < bdHolder.getAliases().length; i++) {
-				this.beanDefinitionReader.getBeanFactory().registerAlias(
-						bdHolder.getBeanName(), bdHolder.getAliases()[i]);
+				this.beanDefinitionReader.getBeanFactory().registerAlias(bdHolder.getBeanName(), bdHolder.getAliases()[i]);
 			}
 		}
 	}

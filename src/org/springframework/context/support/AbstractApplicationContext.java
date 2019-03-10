@@ -93,10 +93,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
 
 	/**
-	 * Name of the ApplicationEventMulticaster bean in the factory.
-	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
-	 * @see org.springframework.context.event.ApplicationEventMulticaster
-	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+	 * 类型为ApplicationEventMulticaster的bean名称。
+	 *
+	 * @see SimpleApplicationEventMulticaster 默认实现类
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
@@ -226,20 +225,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Load or reload configuration.
-	 * @throws org.springframework.context.ApplicationContextException if the
-	 * configuration was invalid or couldn't be found, or if configuration
-	 * has already been loaded and reloading is forbidden
-	 * @throws BeansException if the bean factory could not be initialized
+     * 加载配置文件
 	 */
 	public void refresh() throws BeansException {
 		this.startupTime = System.currentTimeMillis();
 
-		// tell subclass to refresh the internal bean factory
+		// 让子类完成刷新内部beanFactory的操作
+		// 只是读取了bean信息，并没有初始化bean
 		refreshBeanFactory();
+
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-		// configure the bean factory with context semantics
+		// 配置beanFactory上下文语义，即一些通用配置信息
+		// 包括：自定义的属性设置、后置处理器、忽略依赖类型
 		beanFactory.registerCustomEditor(Resource.class, new ResourceEditor(this));
 		beanFactory.registerCustomEditor(InputStream.class, new InputStreamEditor(new ResourceEditor(this)));
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -249,27 +247,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// allows post-processing of the bean factory in context subclasses
 		postProcessBeanFactory(beanFactory);
 
-		// invoke factory processors registered with the context instance
+		// 调用beanFactory的后置处理器（注意不是bean的，而是当前beanFactory对象的）
+		// 暂时用不上
 		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
 			factoryProcessor.postProcessBeanFactory(beanFactory);
 		}
 
-		if (getBeanDefinitionCount() == 0) {
-			logger.warn("No beans defined in ApplicationContext [" + getDisplayName() + "]");
-		}
-		else {
-			logger.info(getBeanDefinitionCount() + " beans defined in ApplicationContext [" + getDisplayName() + "]");
-		}
-
-		// invoke factory processors registered as beans in the context
-		invokeBeanFactoryPostProcessors();
+		// TODO fzk 暂时用不上
+		// 调用所有bean的BeanFactoryPostProcessor类型的后置处理器
+		//invokeBeanFactoryPostProcessors();
 
 		// register bean processor that intercept bean creation
-		registerBeanPostProcessors();
+		// registerBeanPostProcessors();
 
 		// initialize message source for this context
-		initMessageSource();
+		//initMessageSource();
+		// TODO fzk end
 
 		// initialize event multicaster for this context
 		initApplicationEventMulticaster();
@@ -461,6 +455,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanDefinitionNames();
 	}
 
+	/**
+	 * 找到符合指定类型的所有bean名称
+	 * 符合类型是指，属于指定类及其子类，或是指定接口的实现类
+	 */
 	public String[] getBeanDefinitionNames(Class type) {
 		return getBeanFactory().getBeanDefinitionNames(type);
 	}
@@ -525,9 +523,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
-	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by refresh before any other initialization work.
-	 * @see #refresh
+	 * 子类必须实现此方法，用于实际刷新（构造）beanFactory对象
+	 * 该方法会在所有初始化工作之前被调用
 	 */
 	protected abstract void refreshBeanFactory() throws BeansException;
 

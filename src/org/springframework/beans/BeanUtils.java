@@ -56,13 +56,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Convenience method to instantiate a class using the given constructor.
-	 * As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
-	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
-	 * @param ctor constructor to instantiate
-	 * @return the new instance
+	 * 根据传入的构造方法，实例化这个类的对象
 	 */
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
 		try {

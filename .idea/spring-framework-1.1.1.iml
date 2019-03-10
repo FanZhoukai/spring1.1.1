@@ -17,6 +17,10 @@
       <sourceFolder url="file://$MODULE_DIR$/samples/petclinic/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/samples/tiles-example/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/samples/webapp-minimal/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/fzk" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/test/fzk" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
