@@ -127,24 +127,23 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	// Implementation of BeanFactory
 	//---------------------------------------------------------------------
 
-	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
-	 * @param name name of the bean to retrieve
-	 */
+    /**
+     * 根据bean名称获取bean实例
+     * 若找不到，则检查父beanFactory
+     */
 	public Object getBean(String name) throws BeansException {
 		return getBean(name, (Object[]) null);
 	}
 		
-	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
-	 * @param name name of the bean to retrieve
-	 * @param args arguments to use if creating a prototype using explicit arguments to a static
-	 * factory method. It is invalid to use a non-null args value in any other case.
-	 * TODO: We could consider supporting this for constructor args also, but it's really a
-	 * corner case required for AspectJ integration.
-	 */
+    /**
+     * 根据bean名称获取bean实例
+     * 若找不到，则检查父beanFactory
+     *
+     * @param args 若bean是prototype作用域的，静态工厂方法需要的参数。除此之外此参数必须为null
+     *
+     * TODO: We could consider supporting this for constructor args also, but it's really a
+     * corner case required for AspectJ integration.
+     */
 	public Object getBean(String name, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
 		// eagerly check singleton cache for manually registered singletons

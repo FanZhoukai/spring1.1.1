@@ -20,6 +20,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 /**
+ * ApplicationListener的子接口，用于给其他监听器发送事件。
+ * 【不理解】Spring中的观察者模式实例。
+ *
  * Subinterface of ApplicationListener to be implemented by
  * listeners that can broadcast events to other listeners.
  * @author Rod Johnson

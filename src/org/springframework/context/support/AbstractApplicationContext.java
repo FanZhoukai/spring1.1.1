@@ -93,7 +93,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
 
 	/**
-	 * 类型为ApplicationEventMulticaster的bean名称。
+	 * ApplicationEventMulticaster类的bean名称
 	 *
 	 * @see SimpleApplicationEventMulticaster 默认实现类
 	 */
@@ -231,9 +231,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.startupTime = System.currentTimeMillis();
 
 		// 让子类完成刷新内部beanFactory的操作
-		// 只是读取了bean信息，并没有初始化bean
+		// 只是读取了bean定义信息，并没有初始化bean
 		refreshBeanFactory();
 
+        // TODO fzk 暂时用不上
+		/*
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
 		// 配置beanFactory上下文语义，即一些通用配置信息
@@ -248,23 +250,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		postProcessBeanFactory(beanFactory);
 
 		// 调用beanFactory的后置处理器（注意不是bean的，而是当前beanFactory对象的）
-		// 暂时用不上
 		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
 			factoryProcessor.postProcessBeanFactory(beanFactory);
 		}
 
-		// TODO fzk 暂时用不上
 		// 调用所有bean的BeanFactoryPostProcessor类型的后置处理器
-		//invokeBeanFactoryPostProcessors();
+		invokeBeanFactoryPostProcessors();
 
 		// register bean processor that intercept bean creation
-		// registerBeanPostProcessors();
+		registerBeanPostProcessors();
 
 		// initialize message source for this context
-		//initMessageSource();
-		// TODO fzk end
+		initMessageSource();
 
+        // 【不理解】初始化事件监听器
 		// initialize event multicaster for this context
 		initApplicationEventMulticaster();
 
@@ -279,6 +279,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// last step: publish corresponding event
 		publishEvent(new ContextRefreshedEvent(this));
+		*/
+        // TODO fzk end
 	}
 
 	/**
@@ -352,9 +354,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Initialize the ApplicationEventMulticaster.
-	 * Use SimpleApplicationEventMulticaster if none defined in the context.
-	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+     * 初始化applicationEventMulticaster
+     * 默认类型是SimpleApplicationEventMulticaster
 	 */
 	private void initApplicationEventMulticaster() throws BeansException {
 		try {
@@ -422,6 +423,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	// Implementation of BeanFactory
 	//---------------------------------------------------------------------
 
+    /**
+     * 根据bean名称获取bean实例
+     */
 	public Object getBean(String name) throws BeansException {
 		return getBeanFactory().getBean(name);
 	}
