@@ -76,10 +76,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	public static final String FACTORY_BEAN_PREFIX = "&";
 
-	/**
-	 * Marker object to be temporarily registered in the singleton cache
-	 * while instantiating a bean, to be able to detect circular references.
-	 */
+    /**
+     * 实例化bean时，注册进单例缓存的临时标记对象。
+     * 表明当前bean正处于创建之中（in creation），用于监测循环依赖问题
+     */
 	private static final Object CURRENTLY_IN_CREATION = new Object();
 
 
@@ -101,7 +101,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Map from alias to canonical bean name */
 	private final Map aliasMap = Collections.synchronizedMap(new HashMap());
 
-	/** Cache of singletons: bean name --> bean instance */
+    /**
+     * 单例bean的缓存map，结构：Map<String, Object>：bean名称:bean实例
+     */
 	private final Map singletonCache = Collections.synchronizedMap(new HashMap());
 
 
@@ -146,76 +148,70 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
      */
 	public Object getBean(String name, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
-		// eagerly check singleton cache for manually registered singletons
-		Object sharedInstance = this.singletonCache.get(beanName);
+
+        // 检查缓存的单例map（为了获取手动注册的单例bean）
+    Object sharedInstance = this.singletonCache.get(beanName);
+        // 【设计模式】双重检查的单例模式，第一重检查
 		if (sharedInstance != null) {
+		    // 若bean正处于创建过程中，抛出异常
 			if (sharedInstance == CURRENTLY_IN_CREATION) {
 				throw new BeanCurrentlyInCreationException(beanName, "Requested bean is already currently in creation");
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
-			}
+			// 直接返回bean实例，顺便处理factory bean的情况
 			return getObjectForSharedInstance(name, sharedInstance);
 		}
-		else {
-			// check if bean definition exists
-			RootBeanDefinition mergedBeanDefinition = null;
-			try {
-				mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// not found -> check parent
-				if (this.parentBeanFactory != null) {
-					return this.parentBeanFactory.getBean(name);
-				}
-				throw ex;
-			}
 
-			// check if bean definition is not abstract
-			if (mergedBeanDefinition.isAbstract()) {
-				throw new BeanIsAbstractException(name);
-			}
+		// 缓存map中不存在，首先检查bean定义是否存在
+        RootBeanDefinition mergedBeanDefinition = null;
+        try {
+            mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
+        }
+        catch (NoSuchBeanDefinitionException ex) {
+            // 找不到此bean定义，那就让父beanFactory创建一个bean
+            if (this.parentBeanFactory != null) {
+                return this.parentBeanFactory.getBean(name);
+            }
+            throw ex;
+        }
 
-			// Check validity of the usage of the args parameter. This can
-			// only be used for prototypes constructed via a factory method.
-			if (args != null) {
-				if (mergedBeanDefinition.isSingleton()) {			
-					throw new BeanDefinitionStoreException(
-							"Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
-				}
-				else if (mergedBeanDefinition.getFactoryMethodName() == null) {			
-					throw new BeanDefinitionStoreException(
-							"Can only specify arguments in the getBean() method in conjunction with a factory method");
-				}
-			}
-			
-			// create bean instance
-			if (mergedBeanDefinition.isSingleton()) {
-				synchronized (this.singletonCache) {
-					// re-check singleton cache within synchronized block
-					sharedInstance = this.singletonCache.get(beanName);
-					if (sharedInstance == null) {
-						if (logger.isInfoEnabled()) {
-							logger.info("Creating shared instance of singleton bean '" + beanName + "'");
-						}
-						this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
-						try {
-							sharedInstance = createBean(beanName, mergedBeanDefinition, args);
-							this.singletonCache.put(beanName, sharedInstance);
-						}
-						catch (BeansException ex) {
-							this.singletonCache.remove(beanName);
-							throw ex;
-						}
-					}
-				}
-				return getObjectForSharedInstance(name, sharedInstance);
-			}
-			else {
-				// prototype
-				return createBean(name, mergedBeanDefinition, args);
-			}
-		}
+        // bean定义必须是非抽象的
+        if (mergedBeanDefinition.isAbstract()) {
+            throw new BeanIsAbstractException(name);
+        }
+
+        // 检查args参数的可用性。仅适用于prototype作用域的、通过工厂方法构造的bean。
+        if (args != null) {
+            if (mergedBeanDefinition.isSingleton()) {
+                throw new BeanDefinitionStoreException("Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
+            } else if (mergedBeanDefinition.getFactoryMethodName() == null) {
+                throw new BeanDefinitionStoreException("Can only specify arguments in the getBean() method in conjunction with a factory method");
+            }
+        }
+
+        // 创建bean实例
+        if (mergedBeanDefinition.isSingleton()) {
+            // 【设计模式】双重检查的单例模式实例
+            synchronized (this.singletonCache) {
+                // 双重检查的单例模式，锁内第二重检查
+                sharedInstance = this.singletonCache.get(beanName);
+                if (sharedInstance == null) {
+                    this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
+                    try {
+                        sharedInstance = createBean(beanName, mergedBeanDefinition, args);
+                        this.singletonCache.put(beanName, sharedInstance);
+                    }
+                    catch (BeansException ex) {
+                        this.singletonCache.remove(beanName);
+                        throw ex;
+                    }
+                }
+            }
+            return getObjectForSharedInstance(name, sharedInstance);
+        }
+        else {
+            // prototype
+            return createBean(name, mergedBeanDefinition, args);
+        }
 	}
 
 	public Object getBean(String name, Class requiredType) throws BeansException {
@@ -433,10 +429,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	// Implementation methods
 	//---------------------------------------------------------------------
 
-	/**
-	 * Return the bean name, stripping out the factory dereference prefix if necessary,
-	 * and resolving aliases to canonical names.
-	 */
+    /**
+     * 去除特殊前缀、别名转换为正式名
+     */
 	protected String transformedBeanName(String name) throws NoSuchBeanDefinitionException {
 		if (name == null) {
 			throw new NoSuchBeanDefinitionException(name, "Cannot get bean with null name");
@@ -449,10 +444,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return canonicalName != null ? canonicalName : name;
 	}
 
-	/**
-	 * Return whether this name is a factory dereference
-	 * (beginning with the factory dereference prefix).
-	 */
+    /**
+     * 判断是否是一个factory bean名称（即以特殊前缀开头）
+     */
 	protected boolean isFactoryDereference(String name) {
 		return name.startsWith(FACTORY_BEAN_PREFIX);
 	}
@@ -494,51 +488,45 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 	}
 
-	/**
-	 * Get the object for the given shared bean, either the bean
-	 * instance itself or its created object in case of a FactoryBean.
-	 * @param name name that may include factory dereference prefix
-	 * @param beanInstance the shared bean instance
-	 * @return the singleton instance of the bean
-	 */
+    /**
+     * 根据bean名称和实例，获取bean实例。
+     * 处理了factory bean的情况：若实例是factory bean，且调用者想要一个由factory bean创建的bean实例，
+     * 则根据factory bean创建一个实例。
+     * 除此之外的情况，直接返回对应的bean实例。
+     *
+     * @param name bean名称，可能包含factoryBean的特殊前缀
+     * @param beanInstance 单例bean实例
+     * @return
+     */
 	protected Object getObjectForSharedInstance(String name, Object beanInstance) {
 		String beanName = transformedBeanName(name);
 
-		// Don't let calling code try to dereference the
-		// bean factory if the bean isn't a factory
+        // 如果name符合factory bean，实例却不属于FactoryBean类型，则抛出异常
 		if (isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(beanName, beanInstance);
 		}
 
-		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
-		// If it's a FactoryBean, we use it to create a bean instance, unless the
-		// caller actually wants a reference to the factory.
+        // 现在，bean实例可能是普通的bean，或是一个factory bean。
+        // 若实例是factory bean，且是普通的bean名称，则用它创建一个bean实例；
+        // 若实例是factory bean，但带有特殊前缀，则调用者只想要一个factory的实例；
+        // 若实例不是factory bean，则直接返回实例即可。
 		if (beanInstance instanceof FactoryBean) {
 			if (!isFactoryDereference(name)) {
-				// return bean instance from factory
+                // 由factory bean创建一个bean实例
 				FactoryBean factory = (FactoryBean) beanInstance;
-				if (logger.isDebugEnabled()) {
-					logger.debug("Bean with name '" + beanName + "' is a factory bean");
-				}
 				try {
 					beanInstance = factory.getObject();
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 				}
+				// 创建不成功，说明有循环引用的情况
 				if (beanInstance == null) {
-					throw new FactoryBeanCircularReferenceException(
-					    beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference");
+					throw new FactoryBeanCircularReferenceException(beanName, "FactoryBean returned null object: not fully initialized due to circular bean reference");
 				}
-			}
-			else {
-				// the user wants the factory itself
-				if (logger.isDebugEnabled()) {
-					logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
-				}
+			} else {
+			    // 调用者只是想要一个factory bean本身，而不是由它创建的bean实例
 			}
 		}
-
 		return beanInstance;
 	}
 
@@ -547,6 +535,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * Will ask the parent bean factory if not found in this instance.
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
+    /**
+     * 获取bean的根定义（RootBeanDefinition）
+     * 如果当前bean定义是子定义的话，递归找其父bean定义，直到找到其根节点
+     */
 	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
 		try {

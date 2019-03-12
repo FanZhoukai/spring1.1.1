@@ -284,6 +284,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
+    /**
+     * 根据bean名称获取bean定义
+     * （直接从map中取）
+     */
 	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
