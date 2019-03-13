@@ -87,7 +87,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		DestructionAwareBeanPostProcessor.class.getName();
 	}
 
-
+	/* 初始化bean的策略：cglib/反射，默认是cglib */
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
 	/**
@@ -197,35 +197,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 
 	/**
-	 * Delegates to full createBean version with allowEagerCaching=true.
-	 * @see #createBean(String, RootBeanDefinition, Object[], boolean)
+	 * 创建bean
 	 */
-	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
-	    throws BeansException {
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args) throws BeansException {
 		return createBean(beanName, mergedBeanDefinition, args, true);
 	}
 
 	/**
-	 * Create a bean instance for the given bean definition.
-	 * @param beanName name of the bean
-	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param allowEagerCaching whether eager caching of singletons is allowed
-	 * (typically true for normal beans, but false for inner beans)
+	 * 创建bean实例
+	 *
+	 * @param allowEagerCaching 是否允许迫切缓存。一般来说，普通bean可设为true，内部bean设为false
 	 * @param args arguments to use if this is a prototype constructed by a factory method.
-	 * In this case, this will override any args specified in the bean definitions.
-	 * This parameter should be null otherwise.
-	 * @return a new instance of the bean
-	 * @throws BeansException in case of errors
+	 *             In this case, this will override any args specified in the bean definitions.
+	 *             This parameter should be null otherwise.
 	 */
-	protected Object createBean(
-			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args, boolean allowEagerCaching)
-			throws BeansException {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating instance of bean '" + beanName +
-					"' with merged definition [" + mergedBeanDefinition + "]");
-		}
-
+	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args, boolean allowEagerCaching) throws BeansException {
+		// 首先实例化bean依赖的对象（depends-on属性对应的对象）
 		if (mergedBeanDefinition.getDependsOn() != null) {
 			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
 				// guarantee initialization of beans that the current one depends on
@@ -239,18 +226,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean eagerlyCached = false;
 
 		try {
-			// instantiate bean
+			// 初始化bean
 			errorMessage = "Instantiation of bean failed";
 
-			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
+			// TODO fzk 其他情况，暂时不管
+			/*if (mergedBeanDefinition.getFactoryMethodName() != null)  {
 				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
 			}
 			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
 					mergedBeanDefinition.hasConstructorArgumentValues() )  {
 				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
 			}
-			else {
-				// use no-arg constructor
+			else*/ // TODO fzk end
+			{
+				// 使用无参构造方法，创建bean实例，并包装在BeanWrapper类中返回
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
 				instanceWrapper = new BeanWrapperImpl(beanInstance);
 				initBeanWrapper(instanceWrapper);
@@ -297,8 +286,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (eagerlyCached) {
 				removeSingleton(beanName);
 			}
-			throw new BeanCreationException(
-					mergedBeanDefinition.getResourceDescription(), beanName, errorMessage, ex);
+			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName, errorMessage, ex);
 		}
 
 		// Register bean as dependent on specified "dependsOn" beans.

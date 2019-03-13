@@ -41,26 +41,30 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	public Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
-		// don't override the class with CGLIB if no overrides
+	/**
+	 * 根据bean定义，创建bean实例。
+	 *
+	 * 区分使用反射还是CGLIB：
+	 * 若IoC容器不需要覆写bean的方法，则使用反射即可；否则需要使用CGLIB构造子类对象，进行覆写
+	 */
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
-		}
-		else {
-			// must generate CGLIB subclass
+		} else {
 			return instantiateWithMethodInjection(beanDefinition, beanName, owner);
 		}
 	}
-	
+
 	/**
+	 * 子类可重写该方法。
+	 *
+	 * 【不理解】Method Injection是什么意思？
 	 * Subclasses can override this method, which is implemented to throw
 	 * UnsupportedOperationException, if they can instantiate an object with
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use a no-arg constructor.
 	 */
-	protected Object instantiateWithMethodInjection(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 

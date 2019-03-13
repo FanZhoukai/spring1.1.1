@@ -33,6 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
+ * 用于BeanFactory的默认bean实例化策略。
+ * 若方法需要被容器重写（如AOP织入横切逻辑），可使用CGLIB来动态构建子类。
+ *
  * Default object instantiation strategy for use in BeanFactories.
  * Uses CGLIB to generate subclasses dynamically if methods need to be
  * overridden by the container, to implement Method Injection.

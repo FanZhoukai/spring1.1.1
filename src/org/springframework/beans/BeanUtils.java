@@ -37,13 +37,9 @@ import java.util.List;
 public abstract class BeanUtils {
 
 	/**
-	 * Convenience method to instantiate a class using its no-arg constructor.
-	 * As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
-	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
-	 * @param clazz class to instantiate
-	 * @return the new instance
+	 * 使用无参构造函数实例化对象。
+	 * 此方法不会试图根据名字去加载类，应该避免类加载的工作。
+	 * 若传入的类的构造方法不是public的，此处会做setAccessible(true)处理。
 	 */
 	public static Object instantiateClass(Class clazz) throws BeansException {
 		try {
@@ -60,8 +56,8 @@ public abstract class BeanUtils {
 	 */
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
 		try {
-			if (!Modifier.isPublic(ctor.getModifiers()) ||
-					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
+			// 若构造方法非public，设置为可访问
+			if (!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
 				ctor.setAccessible(true);
 			}
 			return ctor.newInstance(args);

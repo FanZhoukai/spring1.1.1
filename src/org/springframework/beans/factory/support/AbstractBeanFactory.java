@@ -149,11 +149,11 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	public Object getBean(String name, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
 
-        // 检查缓存的单例map（为了获取手动注册的单例bean）
-    Object sharedInstance = this.singletonCache.get(beanName);
-        // 【设计模式】双重检查的单例模式，第一重检查
+		// 检查缓存的单例map（为了获取手动注册的单例bean）
+		Object sharedInstance = this.singletonCache.get(beanName);
+		// 【设计模式】双重检查的单例模式，第一重检查
 		if (sharedInstance != null) {
-		    // 若bean正处于创建过程中，抛出异常
+			// 若bean正处于创建过程中，抛出异常
 			if (sharedInstance == CURRENTLY_IN_CREATION) {
 				throw new BeanCurrentlyInCreationException(beanName, "Requested bean is already currently in creation");
 			}
@@ -195,8 +195,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
                 // 双重检查的单例模式，锁内第二重检查
                 sharedInstance = this.singletonCache.get(beanName);
                 if (sharedInstance == null) {
+                	// 将临时对象放入缓存，以解决循环依赖问题
                     this.singletonCache.put(beanName, CURRENTLY_IN_CREATION);
                     try {
+                    	// 创建bean实例，放入缓存map中，替代原有的临时对象
                         sharedInstance = createBean(beanName, mergedBeanDefinition, args);
                         this.singletonCache.put(beanName, sharedInstance);
                     }
@@ -530,11 +532,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return beanInstance;
 	}
 
-	/**
-	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
-	 * Will ask the parent bean factory if not found in this instance.
-	 * @return a merged RootBeanDefinition with overridden properties
-	 */
     /**
      * 获取bean的根定义（RootBeanDefinition）
      * 如果当前bean定义是子定义的话，递归找其父bean定义，直到找到其根节点

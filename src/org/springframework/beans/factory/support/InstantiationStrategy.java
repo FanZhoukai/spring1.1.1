@@ -22,26 +22,16 @@ import java.lang.reflect.Method;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Interface responsible for creating instances corresponding to a
- * root bean definition.
+ * 实例化bean的策略接口
  *
- * <p>This is pulled out into a strategy as various approaches are possible,
- * including using CGLIB to create subclasses on the fly to support
- * Method Injection.
- *
- * @author Rod Johnson
+ * 【设计模式】由于有多种方法可以实现，因此使用策略模式。
+ * 包括反射策略，以及支持运行时方法注入（Method Injection）创建子类的CGLIB策略。
  * @since 1.1
  */
 public interface InstantiationStrategy {
 	
 	/**
-	 * Return an instance of the bean with the given name in this factory.
-	 * @param beanDefinition bean definition
-	 * @param beanName name of the bean when it's created in this context.
-	 * The name can be null if we're autowiring a bean that doesn't
-	 * belong to the factory.
-	 * @param owner owning BeanFactory
-	 * @return a bean instance for this bean definition
+	 * 根据bean定义，创建bean实例
 	 */
 	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner);
 	

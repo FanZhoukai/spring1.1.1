@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * IoC容器在运行时覆写的方法集合
+ *
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
  * @author Rod Johnson

@@ -71,6 +71,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private MutablePropertyValues propertyValues;
 
+	/* 会被IoC容器重写的方法（如AOP织入横切逻辑） */
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
 	private String initMethodName;
@@ -85,6 +86,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
+	/** bean配置中depends-on属性的值，表示不是强依赖的bean */
 	private String[] dependsOn;
 
 	private String resourceDescription;
@@ -311,11 +313,6 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		this.methodOverrides = (methodOverrides != null) ? methodOverrides : new MethodOverrides();
 	}
 
-	/**
-	 * Return information about methods to be overridden by the IoC
-	 * container. This will be empty if there are no method overrides.
-	 * Never returns null.
-	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;
 	}
