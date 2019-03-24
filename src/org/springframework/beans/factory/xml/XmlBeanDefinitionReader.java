@@ -61,13 +61,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean validating = true;
 
+	/**
+	 * 解析xml工具类的对象
+	 * 【设计模式】XmlBeanDefinitionReader本身只定义了一些方法，
+	 * 而真正干活的却是这个成员变量，这符合对象适配器模式的理念：
+	 * 持有一个实际干活的对象的成员变量，提供一些便于调用的方法，并把调用转发给这个对象。
+	 */
 	private EntityResolver entityResolver;
 
 	private Class parserClass = DefaultXmlBeanDefinitionParser.class;
 
 
 	/**
-	 * Create new XmlBeanDefinitionReader for the given bean factory.
+	 * 创建xml bean定义阅读工具类
+	 * @param beanFactory 指定bean factory
 	 */
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		super(beanFactory);
@@ -81,10 +88,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set a SAX entity resolver to be used for parsing. By default, BeansDtdResolver
-	 * will be used. Can be overridden for custom entity resolution, e.g. relative
-	 * to some specific base path.
-	 * @see org.springframework.beans.factory.xml.BeansDtdResolver
+	 * 设置xml解析工具类的对象（真正干活的对象）。
+	 * 默认是BeansDtdResolver类型，可自定义重写。
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
@@ -104,7 +109,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * 从指定xml文件中读取bean定义信息
+	 * 从指定xml文件中加载bean定义信息
 	 */
 	public int loadBeanDefinitions(Resource resource) throws BeansException {
 		if (resource == null) {
@@ -127,7 +132,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			is = resource.getInputStream();
 			Document doc = docBuilder.parse(is);
 
-			// 根据bean定义信息，注册bean实例
+			// 注册bean定义信息
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {

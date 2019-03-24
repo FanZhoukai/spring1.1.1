@@ -7,8 +7,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * 测试类
  *
- * 注意，阅读源码时注释了一些与主干流程无关的代码，都会在上一行备注TODO，并在结束的位置备注end。
- * 当以后测更多功能时，若想要恢复到原始代码，全文搜索TODO fzk即可看到。
+ * 注：
+ * 1. 阅读源码时删除了一些碍眼的log；
+ * 2. 注释了一些与主干流程无关的代码，都会在上一行备注TODO，并在结束的位置备注end，
+ *    当以后测更多功能时，若想要恢复到原始代码，全文搜索TODO fzk即可看到。
+ * 3. 碰到的设计模式，使用"【设计模式】"标注了，全文搜索即可。
  *
  * author:fanzhoukai
  */

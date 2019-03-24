@@ -86,13 +86,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Parent bean factory, for bean inheritance support */
+	/** 父bean factory, 用于支持bean的继承关系 */
 	private BeanFactory parentBeanFactory;
 
 	/** Custom PropertyEditors to apply to the beans of this factory */
 	private Map customEditors = new HashMap();
 
-	/** Dependency types to ignore on dependency check and autowire */
+	/** 在依赖检查或注入时，需要被忽略的依赖类型 */
 	private final Set ignoreDependencyTypes = new HashSet();
 
 	/** BeanPostProcessors to apply in createBean */
@@ -108,16 +108,15 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 
 	/**
-	 * Create a new AbstractBeanFactory.
+	 * 根据指定的父bean factory对象，创建一个AbstractBeanFactory对象
 	 */
 	public AbstractBeanFactory() {
 		ignoreDependencyType(BeanFactory.class);
 	}
 
 	/**
-	 * Create a new AbstractBeanFactory with the given parent.
-	 * @param parentBeanFactory parent bean factory, or null if none
-	 * @see #getBean
+	 * 根据指定的父bean factory对象，创建一个AbstractBeanFactory对象
+	 * @param parentBeanFactory 父bean factory，可为空
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
 		this();
@@ -333,6 +332,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return customEditors;
 	}
 
+	/**
+	 * 添加需要忽略的依赖类型
+	 */
 	public void ignoreDependencyType(Class type) {
 		this.ignoreDependencyTypes.add(type);
 	}

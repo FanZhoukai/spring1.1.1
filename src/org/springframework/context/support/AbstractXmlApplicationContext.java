@@ -29,14 +29,12 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * Convenient abstract superclass for ApplicationContext implementations,
- * drawing configuration from XML documents containing bean definitions
- * understood by an XmlBeanDefinitionParser.
- * @author Rod Johnson
- * @author Juergen Hoeller
+ * ApplicationContext的抽象实现类。
+ * 从包含bean定义的xml文件中拉取配置信息，利用XmlBeanDefinitionParser实现
+ *
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  */
-public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext  {
+public abstract class AbstractXmlApplicationContext extends AbstractApplicationContext {
 
 	/**
 	 * 当前上下文的beanFactory
@@ -64,15 +62,22 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	 */
 	protected final void refreshBeanFactory() throws BeansException {
 		try {
+			// 创建bean factory对象，默认是DefaultListableBeanFactory类型
+			// 内部只是new了一个对象，并记录了父类bean factory对象、添加BeanFactory为忽略依赖类型，并没有其他操作
+			// 此处可以看出，ApplicationContext确实是以BeanFactory为根基的
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+
+			// 根据bean factory对象，创建对应的xml bean定义读取工具，同时设置xml解析工具对象
+			// 读取到的bean定义会被注册到给定的bean factory中
 			XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 			beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+
+			// 初始化bean定义读取器（默认无实现）
 			initBeanDefinitionReader(beanDefinitionReader);
+
+			// 加载bean定义
 			loadBeanDefinitions(beanDefinitionReader);
 			this.beanFactory = beanFactory;
-			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context [" + getDisplayName() + "]: " + beanFactory);
-			}
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("I/O error parsing XML document for application context [" + getDisplayName() + "]", ex);
@@ -87,24 +92,24 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	/**
-	 * Create the bean factory for this context.
-	 * <p>Default implementation creates a DefaultListableBeanFactory with the
-	 * internal bean factory of this context's parent as parent bean factory.
-	 * <p>Can be overridden in subclasses.
-	 * @return the bean factory for this context
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
-	 * @see #getInternalParentBeanFactory
+	 * 创建beanFactory对象
+	 *
+	 * 默认创建DefaultListableBeanFactory类型对象。
+	 * 使用当前context对象的父对象，作为父bean factory。
+	 * 可被子类覆写。
+	 *
+	 * @return 当前context对象的bean factory
 	 */
 	protected DefaultListableBeanFactory createBeanFactory() {
 		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
 	}
 
 	/**
-	 * Initialize the bean definition reader used for loading the bean
-	 * definitions of this context. Default implementation is empty.
-	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
-	 * or using a different XmlBeanDefinitionParser implementation.
-	 * @param beanDefinitionReader the bean definition reader used by this context
+	 * 初始化bean定义解析器，用于为context对象加载bean定义。
+	 * 默认实现为空，可被子类重写，如用于屏蔽掉xml验证（setValidating），或使用一个不同的解析器实现类（setParserClass）。
+	 *
+	 * 这样做是为了便于子类的扩展，有点类似于简化版的前置处理器。子类覆写一个方法，即定义了一个前置处理器。
+	 *
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setValidating
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setParserClass
 	 */
@@ -112,24 +117,24 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	/**
-	 * Load the bean definitions with the given XmlBeanDefinitionReader.
-	 * <p>The lifecycle of the bean factory is handled by the refreshBeanFactory method;
-	 * therefore this method is just supposed to load and/or register bean definitions.
-	 * <p>Delegates to a ResourcePatternResolver for resolving location patterns
-	 * into Resource instances.
-	 * @throws BeansException in case of bean registration errors
-	 * @throws IOException if the required XML document isn't found
+	 * 使用给定的读取器，读取bean定义信息，并注册进reader中的bean factory对象中
+	 *
+	 * bean factory的生命周期由调用该方法的refreshBeanFactory()方法管理，
+	 * 因此该方法只负责加载、注册bean定义信息，其他的不需要管。
+	 *
 	 * @see #refreshBeanFactory
-	 * @see #getConfigLocations
-	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		// 获取配置文件路径位置
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
+			// 获取资源路径解析器
 			ResourcePatternResolver resourcePatternResolver = getResourcePatternResolver();
 			for (int i = 0; i < configLocations.length; i++) {
+				// 利用路径解析器，将路径解析为Resource实例对象
 				Resource[] configResources = resourcePatternResolver.getResources(configLocations[i]);
 				for (int j = 0; j < configResources.length; j++) {
+					// 给reader中的beanFactory注册读取到的bean定义信息
 					reader.loadBeanDefinitions(configResources[j]);
 				}
 			}
@@ -137,9 +142,8 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	}
 
 	/**
-	 * Return the ResourcePatternResolver to use for resolving location patterns
-	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
-	 * supporting Ant-style location patterns.
+	 * 创建ResourcePatternResolver对象，用于解析并匹配路径，转为Resource实例对象。
+	 * 默认类型是PathMatchingResourcePatternResolver，支持ant样式的路径。
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {

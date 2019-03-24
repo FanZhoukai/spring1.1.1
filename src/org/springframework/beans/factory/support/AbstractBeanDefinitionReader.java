@@ -43,6 +43,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * Create a new AbstractBeanDefinitionReader for the given factory.
 	 * @param beanFactory the bean factory to work on
 	 */
+	/**
+	 * 创建xml bean定义阅读工具类
+	 * @param beanFactory 指定bean factory，用于把bean定义加载到这个bean factory中
+	 *
+	 * 注：此处的参数名不太准确，在spring最新版本中参数名改为了registry，只是会判断其类型
+	 */
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
 		this.beanFactory = beanFactory;
 	}
