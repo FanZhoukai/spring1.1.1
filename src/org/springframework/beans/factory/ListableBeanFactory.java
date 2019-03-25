@@ -90,6 +90,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	boolean containsBeanDefinition(String name);
 
 	/**
+	 * 获取属于指定类型及其子类的bean实例。
+	 * 如果是普通bean，根据beanDefinition对象判断；如果是FactoryBean，根据getObjectType()方法判断。
+	 *
+	 * 适用场景：与策略模式结合，获取策略接口下的全部策略bean组成的map。
+	 *
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * getObjectType() in the case of FactoryBeans.

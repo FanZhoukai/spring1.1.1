@@ -52,14 +52,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
 
 	/**
-	 * Load or refresh the persistent representation of the configuration,
-	 * which might an XML file, properties file, or relational database schema.
-	 * @throws org.springframework.context.ApplicationContextException if the config cannot be loaded
-	 * @throws org.springframework.beans.BeansException if the bean factory could not be initialized
+	 * 加载或刷新持久化配置文件
+	 * 如xml, properties文件，或关系数据库schema
 	 */
 	void refresh() throws BeansException;
 
 	/**
+	 * 返回内部的bean factory对象。
+	 *
 	 * Return the internal bean factory of this application context.
 	 * Can be used to access specific functionality of the factory.
 	 * <p>Note that this is just guaranteed to return a non-null instance

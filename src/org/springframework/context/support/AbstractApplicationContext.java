@@ -225,7 +225,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-     * 加载配置文件
+     * 加载或刷新配置文件
 	 */
 	public void refresh() throws BeansException {
 		this.startupTime = System.currentTimeMillis();
@@ -234,10 +234,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 只是读取了bean定义信息，并没有初始化bean
 		refreshBeanFactory();
 
-        // TODO fzk 暂时用不上
-		/*
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
+		// TODO fzk start
+		/*
 		// 配置beanFactory上下文语义，即一些通用配置信息
 		// 包括：自定义的属性设置、后置处理器、忽略依赖类型
 		beanFactory.registerCustomEditor(Resource.class, new ResourceEditor(this));
@@ -273,10 +273,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// check for listener beans and register them
 		refreshListeners();
+		*/
+		// TODO fzk end
 
 		// instantiate singletons this late to allow them to access the message source
 		beanFactory.preInstantiateSingletons();
 
+		// TODO fzk start
+		/*
 		// last step: publish corresponding event
 		publishEvent(new ContextRefreshedEvent(this));
 		*/
@@ -486,8 +490,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the internal bean factory of the parent context if it implements
-	 * ConfigurableApplicationContext; else, return the parent context itself.
+	 * 该方法的作用是，获取父对象的BeanFactory。
+	 *
+	 * 由于ApplicationContext继承了BeanFactory，因此对于一般的context对象，直接强转即可。
+	 * 但由于ConfigurableApplicationContext类比较特殊，提供了getBeanFactory()方法，
+	 * 即它的实现类内部需要维护了一个bean factory对象，因此需要手动调用一下这个方法。
+	 *
+	 * 转成易读的伪代码：
+	 * if(parent instanceof ConfigurableApplicationContext) {
+	 *     return ((ConfigurableApplicationContext) parent).getBeanFactory(); // 强转为特殊类调用特殊方法
+	 * } else {
+	 *     return (BeanFactory) parent; // 将ApplicationContext退化为BeanFactory类型返回
+	 * }
+	 *
 	 * @see org.springframework.context.ConfigurableApplicationContext#getBeanFactory
 	 */
 	protected BeanFactory getInternalParentBeanFactory() {

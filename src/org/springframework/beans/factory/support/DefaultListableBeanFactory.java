@@ -38,12 +38,17 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Concrete implementation of ListableBeanFactory.
- * Can be used as a standalone bean factory,
- * or as a superclass for custom bean factories.
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @since 16 April 2001
+ * BeanFactory的具体实现类。
+ * 可当做独立的bean factory使用，也可以用作自定义bean factory的父类。
+ *
+ * 该类是BeanFactory接口下相对功能较完整的实现类，可以说是spring IoC模块的根基，也是使用最广泛的实现类。
+ * 如果业务需要扩展BeanFactory，基本上都是继承这个类。
+ * 该类功能的实现是通过实现不同接口来完成的，主要的功能性接口如下：
+ *
+ * 1. AbstractAutowireCapableBeanFactory：提供了自动注入的功能；
+ * 2. ConfigurableListableBeanFactory：提供了对预实例化单例对象的功能；
+ * 3. ListableBeanFactory：提供快速查找、统计bean实例的功能；
+ * 4. BeanDefinitionRegistry：提供了注册bean的功能。
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
     implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
@@ -66,7 +71,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Create a new DefaultListableBeanFactory with the given parent.
+	 * 根据指定的父bean factory对象，创建一个DefaultListableBeanFactory对象
 	 */
 	public DefaultListableBeanFactory(BeanFactory parentBeanFactory) {
 		super(parentBeanFactory);

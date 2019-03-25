@@ -27,6 +27,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
+ * EntityResolver是一个读取xml的工具类，而本类BeansDtdResolver是针对spring bean DTD格式的实现类
+ *
+ * 会从classpath下的"/org/springframework/beans/factory/xml/spring-beans.dtd"路径下加载dtd文件
+ *
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring classpath resp. JAR file.
  *

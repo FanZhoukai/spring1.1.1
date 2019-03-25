@@ -21,6 +21,10 @@ import java.io.IOException;
 import org.springframework.core.io.Resource;
 
 /**
+ * 策略接口，用于解析资源文件路径匹配的策略接口
+ *
+ * 【设计模式】策略模式
+ *
  * Strategy interface for resolving a location pattern into Resource objects.
  *
  * <p>Can be used with any sort of location pattern (e.g. "/WEB-INF/*-context.xml"):

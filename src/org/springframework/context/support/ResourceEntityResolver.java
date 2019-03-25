@@ -51,6 +51,11 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 
 	private final ApplicationContext applicationContext;
 
+	/**
+	 * 创建一个xml资源读取工具对象
+	 *
+	 * @param applicationContext 指定context对象
+	 */
 	public ResourceEntityResolver(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
