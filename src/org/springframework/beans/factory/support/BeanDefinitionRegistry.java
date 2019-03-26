@@ -84,13 +84,13 @@ public interface BeanDefinitionRegistry {
 	String[] getAliases(String name) throws NoSuchBeanDefinitionException;
 
 	/**
-	 * Given a bean name, create an alias. We typically use this method to
-	 * support names that are illegal within XML ids (used for bean names).
-	 * @param name the name of the bean
-	 * @param alias alias that will behave the same as the bean name
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
-	 * @throws BeansException if the alias is already in use
+	 * 根据bean名称，创建别名
+	 * 通常用于支持那些在xml不允许定义多个的id
+	 *
+	 * @param name  bean名称
+	 * @param alias 别名，作用与bean名称相同
+	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException 找不到传入的bean名称
+	 * @throws BeansException                                                  别名已经被使用
 	 */
 	void registerAlias(String name, String alias) throws BeansException;
 

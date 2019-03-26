@@ -1,34 +1,30 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by objects used within a BeanFactory
- * that are themselves factories. If a bean implements this interface,
- * it is used as a factory, not directly as a bean.
+ * 由bean factory中使用的对象实现的接口，这些对象本身就是一个工厂。
+ * 如果一个bean实现了这个接口，它会被当做工厂使用，而不是直接当做普通bean。
+ * <p>
+ * 也就是说，如果getBean(beanName)方法的beanName对应的类属于此接口，
+ * 那么获取到的bean将是由此工厂实现类产生的bean(getObject)，而不是此工厂bean对象本身。
+ * <p>
+ * 此接口支持singleton或prototype模式。
  *
- * <p><b>NB: A bean that implements this interface cannot be used
- * as a normal bean.</b>
- *
- * <p>FactoryBeans can support singletons and prototypes.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @since March 08, 2003
  * @see org.springframework.beans.factory.BeanFactory
  */
 public interface FactoryBean {

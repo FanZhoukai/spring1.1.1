@@ -49,12 +49,10 @@ public interface ConfigurableListableBeanFactory
 	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
 	/**
-	 * Ensure that all non-lazy-init singletons are instantiated, also considering
-	 * FactoryBeans. Typically invoked at the end of factory setup, if desired.
-	 * <p>As this is a startup method, it should destroy already created singletons
-	 * if it fails, to avoid dangling resources. In other words, after invocation
-	 * of that method, either all or no singletons at all should be instantiated.
-	 * @throws BeansException if one of the singleton beans could not be created
+	 * 初始化全部单例对象（懒加载除外），同时考虑FactoryBean的情况。
+	 * 如果需要的话，通常在bean factory设置结束后被调用。
+	 * 由于这是一个启动方法（startup method），如果失败，必须销毁所有已创建的单例对象，以避免挂起资源。
+	 * 换句话说，该方法结束后，所有的单例实例应该要么全部被创建，要么全部不被创建。
 	 */
 	void preInstantiateSingletons() throws BeansException;
 

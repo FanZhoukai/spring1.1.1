@@ -158,15 +158,11 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		this.beanDefinitionReader = reader;
 		this.resource = resource;
 
-		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
 		this.defaultLazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
-		logger.debug("Default lazy init '" + this.defaultLazyInit + "'");
 		this.defaultDependencyCheck = root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE);
-		logger.debug("Default dependency check '" + this.defaultDependencyCheck + "'");
 		this.defaultAutowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
-		logger.debug("Default autowire '" + this.defaultAutowire + "'");
 
 		// 解析xml
 		NodeList nl = root.getChildNodes();
@@ -245,12 +241,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	/**
-	 * Parse a standard bean definition into a BeanDefinitionHolder,
-	 * including bean name and aliases.
-	 * <p>Bean elements specify their canonical name as "id" attribute
-	 * and their aliases as a delimited "name" attribute.
-	 * <p>If no "id" specified, uses the first name in the "name" attribute
-	 * as canonical name, registering all others as aliases.
+	 * 将一个标准的bean定义转为Holder对象（包装一层），添加了bean名称和别名信息。
+	 * bean element指明了bean的正式名称，即id属性；而别名则是name属性。
+	 * 如果没有指定"id"，使用其"name"属性中的第一个名字作为正式名称，并将剩余的注册为别名。
 	 */
 	protected BeanDefinitionHolder parseBeanDefinition(Element ele) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
@@ -261,13 +254,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
+		// xml中未指定id，使用name中的第一个作为id
 		if (!StringUtils.hasLength(id) && !aliases.isEmpty()) {
 			id = (String) aliases.remove(0);
-			logger.debug("No XML 'id' specified - using '" + id + "' as ID and " + aliases + " as aliases");
 		}
 
+		// element对象转为bean定义对象
 		BeanDefinition beanDefinition = parseBeanDefinition(ele, id);
 
+		// 若仍然id为空，且该bean是根定义，则将id设置为如下格式：[bean类名]#[计数器]
+		// 例：类A的多个bean均未设置id，则id自动设置为：A#1, A#2, A#3...
+		// 若bean不是根定义，抛出异常。
 		if (!StringUtils.hasLength(id)) {
 			if (beanDefinition instanceof RootBeanDefinition) {
 				String className = ((RootBeanDefinition) beanDefinition).getBeanClassName();
@@ -290,25 +287,31 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	}
 
 	/**
-	 * Parse the BeanDefinition itself, without regard to name or aliases.
+	 * 转换bean定义本身，不考虑名称或别名
 	 */
 	protected BeanDefinition parseBeanDefinition(Element ele, String beanName) {
 		String className = null;
 		try {
+			// 解析类名
 			if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 				className = ele.getAttribute(CLASS_ATTRIBUTE);
 			}
+			// 解析父bean
 			String parent = null;
 			if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 				parent = ele.getAttribute(PARENT_ATTRIBUTE);
 			}
 
+			// 解析构造方法参数
 			ConstructorArgumentValues cargs = getConstructorArgSubElements(beanName, ele);
+			// 解析属性值
 			MutablePropertyValues pvs = getPropertyValueSubElements(beanName, ele);
 
+			// 根据以上信息，创建bean定义
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
 					className, parent, cargs, pvs, this.beanDefinitionReader.getBeanClassLoader());
 
+			// 解析xml中的其他属性，设置进bean定义中
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 				String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS, true, true));

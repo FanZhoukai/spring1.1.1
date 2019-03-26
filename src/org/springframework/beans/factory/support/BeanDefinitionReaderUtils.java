@@ -20,30 +20,29 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
- * Common utility methods that are useful fo bean definition readers.
- * @author Juergen Hoeller
- * @since 09.07.2004
+ * 读取bean定义工具类
+ *
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser
  */
 public class BeanDefinitionReaderUtils {
 
 	/**
-	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
-	 * class name, parent, constructor arguments, and property values.
-	 * @param className the name of the bean class, if any
-	 * @param parent the name of the parent bean, if any
-	 * @param cargs the constructor arguments, if any
-	 * @param pvs the property values, if any
-	 * @param classLoader the ClassLoader to use for loading bean classes
-	 * (can be null to just register bean classes by name)
-	 * @return the bean definition
-	 * @throws ClassNotFoundException if the bean class could not be loaded
+	 * 根据给定的类名、父定义、构造方法参数、属性值，
+	 * 创建一个根定义（RootBeanDefinition）或子定义（ChildBeanDefinition）对象。
+	 * 根据parent是否存在，来判断创建父/子定义对象。
+	 *
+	 * @param className   bean类名
+	 * @param parent      父bean名称
+	 * @param cargs       构造方法参数
+	 * @param pvs         属性名称(property values)
+	 * @param classLoader 用于加载bean类对象的类加载器，若只想根据名称注册bean的class对象，可为空
+	 * @return bean定义
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-	    String className, String parent, ConstructorArgumentValues cargs,
-	    MutablePropertyValues pvs, ClassLoader classLoader)
-	    throws ClassNotFoundException {
+			String className, String parent, ConstructorArgumentValues cargs,
+			MutablePropertyValues pvs, ClassLoader classLoader)
+			throws ClassNotFoundException {
 
 		Class beanClass = null;
 		if (className != null && classLoader != null) {
@@ -53,16 +52,13 @@ public class BeanDefinitionReaderUtils {
 		if (parent == null) {
 			if (beanClass != null) {
 				return new RootBeanDefinition(beanClass, cargs, pvs);
-			}
-			else {
+			} else {
 				return new RootBeanDefinition(className, cargs, pvs);
 			}
-		}
-		else {
+		} else {
 			if (beanClass != null) {
 				return new ChildBeanDefinition(parent, beanClass, cargs, pvs);
-			}
-			else {
+			} else {
 				return new ChildBeanDefinition(parent, className, cargs, pvs);
 			}
 		}

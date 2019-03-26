@@ -1,7 +1,5 @@
 package org.springframework.beans.factory.config;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-
 /**
  * Holder for a BeanDefinition with name and aliases.
  *
@@ -37,10 +35,11 @@ public class BeanDefinitionHolder {
 	}
 
 	/**
-	 * Create a new BeanDefinitionHolder.
-	 * @param beanDefinition the BeanDefinition
-	 * @param beanName the name of the bean
-	 * @param aliases alias names of the bean, or null if none
+	 * 创建新的BeanDefinitionHolder
+	 *
+	 * @param beanDefinition bean定义
+	 * @param beanName       bean名称
+	 * @param aliases        bean别名，可空
 	 */
 	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, String[] aliases) {
 		this.beanDefinition = beanDefinition;

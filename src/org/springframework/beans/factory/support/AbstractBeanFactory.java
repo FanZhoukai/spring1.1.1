@@ -69,10 +69,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 	/**
-	 * Used to dereference a FactoryBean and distinguish it from beans
-	 * <i>created</i> by the factory. For example, if the bean named
-	 * <code>myEjb</code> is a factory, getting <code>&myEjb</code> will
-	 * return the factory, not the instance returned by the factory.
+	 * 用于区别一个factory bean和一个利用bean factory创建的普通bean。
+	 * 例如，名称为"myEjb"的bean是一个工厂bean，那么使用"&myEjb"就会得到这个工厂bean本身，而不是这个工厂产生的实例。
 	 */
 	public static final String FACTORY_BEAN_PREFIX = "&";
 
@@ -98,7 +96,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
 
-	/** Map from alias to canonical bean name */
+	/** bean正式名称的别名map，key:别名; value:正式名称 */
 	private final Map aliasMap = Collections.synchronizedMap(new HashMap());
 
     /**
@@ -358,10 +356,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return beanPostProcessors;
 	}
 
+	/**
+	 * 根据bean名称，创建别名
+	 */
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		}
 		synchronized (this.aliasMap) {
 			Object registeredName = this.aliasMap.get(alias);
 			if (registeredName != null) {
@@ -443,7 +441,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		if (name.startsWith(FACTORY_BEAN_PREFIX)) {
 			name = name.substring(FACTORY_BEAN_PREFIX.length());
 		}
-		// handle aliasing
+		// 处理别名，若有，则返回对应正式名
 		String canonicalName = (String) this.aliasMap.get(name);
 		return canonicalName != null ? canonicalName : name;
 	}
@@ -534,20 +532,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return beanInstance;
 	}
 
-    /**
-     * 获取bean的根定义（RootBeanDefinition）
-     * 如果当前bean定义是子定义的话，递归找其父bean定义，直到找到其根节点
-     */
-	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
-	    throws BeansException {
+	/**
+	 * 获取bean的根定义（RootBeanDefinition）
+	 * 如果当前bean定义是子定义的话，递归找其父bean定义，直到找到其根节点。
+	 * 因此，最后的结果应递归包含所有parent属性指代的bean定义信息。
+	 *
+	 * @param includingAncestors
+	 */
+	public RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors) throws BeansException {
 		try {
 			return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		} catch (NoSuchBeanDefinitionException ex) {
 			if (includingAncestors && getParentBeanFactory() instanceof AbstractBeanFactory) {
 				return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
-			}
-			else {
+			} else {
 				throw ex;
 			}
 		}

@@ -126,6 +126,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (rbd.hasBeanClass() && type.isAssignableFrom(rbd.getBeanClass()));
 	}
 
+	/**
+	 * 判断是否包含一个bean的定义信息
+	 */
 	public boolean containsBeanDefinition(String beanName) {
 		return this.beanDefinitionMap.containsKey(beanName);
 	}
@@ -217,23 +220,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory
 	//---------------------------------------------------------------------
 
+	/**
+	 * 初始化全部单例对象（懒加载除外），同时考虑FactoryBean的情况。
+	 * 如果失败，销毁所有已创建的单例对象，以避免挂起资源。
+	 */
 	public void preInstantiateSingletons() throws BeansException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Pre-instantiating singletons in factory [" + this + "]");
-		}
 		try {
 			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 				String beanName = (String) it.next();
+				// 包含bean定义信息，才允许继续创建
 				if (containsBeanDefinition(beanName)) {
+					// 获取融合后的bean定义对象。其中融合是指递归包含所有parent属性指代的bean定义信息
 					RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+					// 满足以下条件才会在此步创建bean：有bean类型、非抽象、是单例、非懒加载
 					if (bd.hasBeanClass() && !bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+						// 若属于FactoryBean，首先获取到这个工厂bean后，再获取这个bean
+						// （因为获取bean时会识别出它是由工厂bean创建的，所以需要首先把工厂bean创建出来）
 						if (FactoryBean.class.isAssignableFrom(bd.getBeanClass())) {
 							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+							// factory bean下，需要通过FactoryBean来判断这个bean是否单例
 							if (factory.isSingleton()) {
 								getBean(beanName);
 							}
-						}
-						else {
+						} else {
+							// 非FactoryBean，普通bean直接创建即可
 							getBean(beanName);
 						}
 					}
@@ -241,7 +251,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		catch (BeansException ex) {
-			// destroy already created singletons to avoid dangling resources
+			// 销毁所有已创建的单例对象，以避免挂起资源
 			try {
 				destroySingletons();
 			}

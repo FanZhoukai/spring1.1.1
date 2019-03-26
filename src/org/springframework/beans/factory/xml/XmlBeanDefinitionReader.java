@@ -117,14 +117,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		InputStream is = null;
 		try {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading XML bean definitions from " + resource + "");
-			}
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using JAXP implementation [" + factory + "]");
-			}
 			// 读取xml，将其中的信息转为内存中的Document对象
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setValidating(this.validating);
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			docBuilder.setErrorHandler(new BeansErrorHandler());
@@ -134,26 +128,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 			// 注册bean定义信息
 			return registerBeanDefinitions(doc, resource);
-		}
-		catch (ParserConfigurationException ex) {
+
+		} catch (ParserConfigurationException ex) {
 			throw new BeanDefinitionStoreException("Parser configuration exception parsing XML from " + resource, ex);
-		}
-		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " +
-			                                       resource + " is invalid", ex);
-		}
-		catch (SAXException ex) {
+		} catch (SAXParseException ex) {
+			throw new BeanDefinitionStoreException("Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
+		} catch (SAXException ex) {
 			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
-		}
-		finally {
+		} finally {
 			if (is != null) {
 				try {
 					is.close();
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					logger.warn("Could not close InputStream", ex);
 				}
 			}

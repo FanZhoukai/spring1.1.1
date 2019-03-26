@@ -276,7 +276,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		*/
 		// TODO fzk end
 
-		// instantiate singletons this late to allow them to access the message source
+		// 初始化单例实例。这么晚才初始化，是为了让它们能访问到message source
 		beanFactory.preInstantiateSingletons();
 
 		// TODO fzk start
@@ -497,8 +497,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * 即它的实现类内部需要维护了一个bean factory对象，因此需要手动调用一下这个方法。
 	 *
 	 * 转成易读的伪代码：
-	 * if(parent instanceof ConfigurableApplicationContext) {
-	 *     return ((ConfigurableApplicationContext) parent).getBeanFactory(); // 强转为特殊类调用特殊方法
+	 * if(parent instanceof 特殊类型) {
+	 *     return ((特殊类型) parent).getBeanFactory(); // 强转为特殊类调用特殊方法
 	 * } else {
 	 *     return (BeanFactory) parent; // 将ApplicationContext退化为BeanFactory类型返回
 	 * }
@@ -548,10 +548,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected abstract void refreshBeanFactory() throws BeansException;
 
 	/**
-	 * Subclasses must return their internal bean factory here.
-	 * They should implement the lookup efficiently, so that it can be called
-	 * repeatedly without a performance penalty.
-	 * @return this application context's internal bean factory
+	 * 子类必须在这里返回内部bean factory
+	 * 该方法的实现尽量高效，以便于被重复调用，避免性能损耗
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory();
 
