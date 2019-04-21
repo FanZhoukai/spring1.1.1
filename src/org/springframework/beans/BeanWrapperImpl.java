@@ -245,6 +245,9 @@ public class BeanWrapperImpl implements BeanWrapper {
 		}
 	}
 
+	/**
+	 * 为指定类型的所有属性，注册自定义属性编辑器
+	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
 	}

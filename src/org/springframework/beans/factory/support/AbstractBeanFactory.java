@@ -87,7 +87,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** 父bean factory, 用于支持bean的继承关系 */
 	private BeanFactory parentBeanFactory;
 
-	/** Custom PropertyEditors to apply to the beans of this factory */
+	/** 自定义属性编辑器，应用于当前工厂的bean。结构：[Class : PropertyEditor] */
 	private Map customEditors = new HashMap();
 
 	/** 在依赖检查或注入时，需要被忽略的依赖类型 */
@@ -144,6 +144,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
      * corner case required for AspectJ integration.
      */
 	public Object getBean(String name, Object[] args) throws BeansException {
+		// 去除前缀，转换别名
 		String beanName = transformedBeanName(name);
 
 		// 检查缓存的单例map（为了获取手动注册的单例bean）
@@ -318,6 +319,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		this.parentBeanFactory = parentBeanFactory;
 	}
 
+	/**
+	 * 注册指定类型的属性编辑器
+	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		this.customEditors.put(requiredType, propertyEditor);
 	}
@@ -382,11 +386,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Add the given singleton object to the singleton cache of this factory.
-	 * <p>To be called for eager registration of singletons, e.g. to be able to
-	 * resolve circular references.
-	 * @param beanName the name of the bean
-	 * @param singletonObject the singleton object
+	 * 将给定的单例bean添加进当前工厂的缓存。
+	 * 需要迫切注册时调用，比如要解决循环依赖问题时。
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
 		this.singletonCache.put(beanName, singletonObject);
@@ -454,9 +455,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Initialize the given BeanWrapper with the custom editors registered
-	 * with this factory.
-	 * @param bw the BeanWrapper to initialize
+	 * 初始化bean包装器（即处理自定义属性编辑器）
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
 		for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
@@ -552,6 +551,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
+	 * 返回一个根bean定义。若本身不是根，找到根后合并返回。
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a child definition.
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
@@ -563,9 +563,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		else if (bd instanceof ChildBeanDefinition) {
 			ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 			RootBeanDefinition pbd = null;
+			// TODO 这个判断作用是什么？
+			// 当前bean和父bean不是同一个
 			if (!beanName.equals(cbd.getParentName())) {
 				pbd = getMergedBeanDefinition(cbd.getParentName(), true);
 			}
+			// 当前bean就是自己的父bean
 			else {
 				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
 					pbd = ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(cbd.getParentName(), true);

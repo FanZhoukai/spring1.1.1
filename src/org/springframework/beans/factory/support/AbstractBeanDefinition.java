@@ -39,14 +39,19 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AbstractBeanDefinition implements BeanDefinition {
 
+	/** 自动装配模式：不自动注入 */
 	public static final int AUTOWIRE_NO = 0;
 
+	/** 自动装配模式：根据名称注入 */
 	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 
+	/** 自动装配模式：根据类型注入 */
 	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
+	/** 自动装配模式：根据构造方法注入 */
 	public static final int AUTOWIRE_CONSTRUCTOR = AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
 
+	/** 自动装配模式：自动检测注入 */
 	public static final int AUTOWIRE_AUTODETECT = AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
 
 
@@ -404,6 +409,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
+	 * 获取自动装配模式
 	 * Return the resolved autowire code,
 	 * (resolving AUTOWIRE_AUTODETECT to AUTOWIRE_CONSTRUCTOR or AUTOWIRE_BY_TYPE).
 	 * @see #AUTOWIRE_AUTODETECT

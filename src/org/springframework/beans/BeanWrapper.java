@@ -20,29 +20,20 @@ import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 
 /**
- * The central interface of Spring's low-level JavaBeans infrastructure;
- * the default implementation is BeanWrapperImpl. Typically not directly
- * used by application code but rather implicitly via a BeanFactory or
- * a DataBinder.
+ * Bean包装类
  *
- * <p>To be implemented by classes that can manipulate Java beans.
- * Implementing classes have the ability to get and set property values
- * (individually or in bulk), get property descriptors and query the
- * readability and writability of properties.
+ * 是Spring底层javabean基础设施的中心接口，默认实现是BeanWrapperImpl。
+ * 通常不直接由应用程序代码使用，而是通过BeanFactory或DataBinder隐式地使用。
  *
- * <p>This interface supports <b>nested properties</b> enabling the setting
- * of properties on subproperties to an unlimited depth.
+ * 由能够操作Java bean的类实现。实现类能够获取、设置属性值（单独或批量），
+ * 获取属性描述符并查询属性的可读性和可写性。
+ * 此接口支持嵌套属性，允许将子属性上的属性设置为无限深度。
  *
- * <p>If a property update causes an exception, a PropertyVetoException will be
- * thrown. Bulk updates continue after exceptions are encountered, throwing an
- * exception wrapping <b>all</b> exceptions encountered during the update.
+ * 如果属性更新导致异常，则会抛出PropertyVetoException。
+ * 遇到异常后会继续进行批量更新，最后抛出一个包含更新期间所有异常的“总异常”。
  *
- * <p>BeanWrapper implementations can be used repeatedly, with their "target"
- * or wrapped object changed.
- * 
- * @author Rod Johnson
- * @since 13 April 2001
- * @see BeanWrapperImpl
+ * 可以重复使用，改变它们的目标对象或被包装的对象。
+ *
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.validation.DataBinder
  */
@@ -68,10 +59,7 @@ public interface BeanWrapper extends PropertyAccessor {
 	Class getWrappedClass();
 
 	/**
-	 * Register the given custom property editor for all properties
-	 * of the given type.
-	 * @param requiredType type of the property
-	 * @param propertyEditor editor to register
+	 * 为指定类型的所有属性，注册自定义属性编辑器
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 

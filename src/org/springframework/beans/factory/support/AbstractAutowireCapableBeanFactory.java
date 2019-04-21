@@ -241,11 +241,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			{
 				// 使用无参构造方法，创建bean实例，并包装在BeanWrapper类中返回
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
+
+				// 初始化bean包装器（即处理自定义属性编辑器） TODO fzk 暂时未看
 				instanceWrapper = new BeanWrapperImpl(beanInstance);
 				initBeanWrapper(instanceWrapper);
 			}
 			bean = instanceWrapper.getWrappedInstance();
 
+			// 迫切缓存单例bean
+			// 解决循环依赖问题，比如由BeanFactoryAware这种生命周期接口触发
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
 			if (allowEagerCaching && mergedBeanDefinition.isSingleton()) {
@@ -253,7 +257,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				eagerlyCached = true;
 			}
 
-			// initialize bean
+			// 初始化bean
 			errorMessage = "Initialization of bean failed";
 
 			populateBean(beanName, mergedBeanDefinition, instanceWrapper);
@@ -618,27 +622,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * Populate the bean instance in the given BeanWrapper with the property values
-	 * from the bean definition.
-	 * @param beanName name of the bean
-	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param bw BeanWrapper with bean instance
+	 * 给bean实例属性赋值。属性值从bean定义中获取到
 	 */
 	protected void populateBean(String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw)
 			throws BeansException {
-
+		// 获取bean定义中的属性值
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
 
 		if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
 				mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues mpvs = new MutablePropertyValues(pvs);
 
-			// add property values based on autowire by name if it's applied
+			// 基于byName属性赋值
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 				autowireByName(beanName, mergedBeanDefinition, bw, mpvs);
 			}
 
-			// add property values based on autowire by type if it's applied
+			// 基于byType属性赋值
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 				autowireByType(beanName, mergedBeanDefinition, bw, mpvs);
 			}
@@ -651,6 +651,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * 自动装配设置为byName，则用工厂中其他bean的引用来填充所有缺失的属性
+	 *
 	 * Fills in any missing property values with references to
 	 * other beans in this factory if autowire is set to "byName".
 	 * @param beanName name of the bean we're wiring up.
