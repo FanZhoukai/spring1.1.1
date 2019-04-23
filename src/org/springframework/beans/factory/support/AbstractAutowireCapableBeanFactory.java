@@ -157,10 +157,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		applyPropertyValues(name, bd, new BeanWrapperImpl(existingBean), bd.getPropertyValues());
 	}
 
+	/**
+	 * 执行初始化之前的后置处理器
+	 */
 	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String name) throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + name + "'");
-		}
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
@@ -242,7 +242,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// 使用无参构造方法，创建bean实例，并包装在BeanWrapper类中返回
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);
 
-				// 初始化bean包装器（即处理自定义属性编辑器） TODO fzk 暂时未看
+				// 初始化bean包装器（即处理自定义属性编辑器）TODO fzk 暂时未看
 				instanceWrapper = new BeanWrapperImpl(beanInstance);
 				initBeanWrapper(instanceWrapper);
 			}
@@ -259,25 +259,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// 初始化bean
 			errorMessage = "Initialization of bean failed";
-
+			// 属性赋值
 			populateBean(beanName, mergedBeanDefinition, instanceWrapper);
 
+			// 处理Aware接口：BeanNameAware、BeanFactoryAware
 			if (bean instanceof BeanNameAware) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking setBeanName on BeanNameAware bean '" + beanName + "'");
-				}
 				((BeanNameAware) bean).setBeanName(beanName);
 			}
-
 			if (bean instanceof BeanFactoryAware) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking setBeanFactory on BeanFactoryAware bean '" + beanName + "'");
-				}
 				((BeanFactoryAware) bean).setBeanFactory(this);
 			}
 
+			// 初始化前的后置处理器
 			bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+			// 初始化
 			invokeInitMethods(beanName, mergedBeanDefinition, bean);
+			// 初始化后的后置处理器
 			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 		}
 		catch (BeanCreationException ex) {
@@ -1029,42 +1026,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Give a bean a chance to react now all its properties are set,
-	 * and a chance to know about its owning bean factory (this object).
-	 * This means checking whether the bean implements InitializingBean
-	 * and/or BeanFactoryAware, and invoking the necessary callback(s) if it does.
-	 * @param bean new bean instance we may need to initialize
-	 * @param beanName the bean has in the factory. Used for debug output.
-	 * @throws Throwable if thrown by init methods or by the invocation process
+	 * 目前bean已经完成属性赋值，且可以获取到他自己的beanFactory。
+	 * 两种方式可以设置初始化方法：bean类实现InitializingBean；bean设置initMethod
 	 */
-	protected void invokeInitMethods(String beanName, RootBeanDefinition mergedBeanDefinition, Object bean)
-			throws Throwable {
-
+	protected void invokeInitMethods(String beanName, RootBeanDefinition mergedBeanDefinition, Object bean) throws Throwable {
+		// 处理InitializingBean接口
 		if (bean instanceof InitializingBean) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking afterPropertiesSet() on bean with beanName '" + beanName + "'");
-			}
 			((InitializingBean) bean).afterPropertiesSet();
 		}
-
+		// 处理initMethodName
 		if (mergedBeanDefinition.getInitMethodName() != null) {
-			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName(),
-					mergedBeanDefinition.getResourceDescription());
+			invokeCustomInitMethod(beanName, bean, mergedBeanDefinition.getInitMethodName(), mergedBeanDefinition.getResourceDescription());
 		}
 	}
 
 	/**
-	 * Invoke the specified custom init method on the given bean.
-	 * <p>Can be overridden in subclasses for custom resolution of init
-	 * methods with arguments.
+	 * 调用指定bean的自定义初始化方法（init method）
+	 * 子类可以重写此方法，用于自定义的解决方案（如执行带参的初始化方法）
 	 */
 	protected void invokeCustomInitMethod(String beanName, Object bean, String initMethodName,
 			String resourceDescription) throws Throwable {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking custom init method '" + initMethodName +
-					"' on bean with beanName '" + beanName + "'");
-		}
 		try {
 			Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
 			if (initMethod == null) {

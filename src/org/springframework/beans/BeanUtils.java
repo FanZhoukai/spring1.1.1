@@ -37,7 +37,7 @@ import java.util.List;
 public abstract class BeanUtils {
 
 	/**
-	 * 使用无参构造函数实例化对象。
+	 * 使用反射（无参构造函数）实例化对象。
 	 * 此方法不会试图根据名字去加载类，应该避免类加载的工作。
 	 * 若传入的类的构造方法不是public的，此处会做setAccessible(true)处理。
 	 */

@@ -79,8 +79,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	/* 会被IoC容器重写的方法（如AOP织入横切逻辑） */
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
+	// bean初始化方法名
 	private String initMethodName;
-
+	// bean销毁时调用的方法名
 	private String destroyMethodName;
 
 	private String factoryMethodName;

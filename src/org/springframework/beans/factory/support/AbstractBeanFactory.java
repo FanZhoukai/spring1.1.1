@@ -93,7 +93,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** 在依赖检查或注入时，需要被忽略的依赖类型 */
 	private final Set ignoreDependencyTypes = new HashSet();
 
-	/** BeanPostProcessors to apply in createBean */
+	/** 后置处理器列表（在createBean方法中被调用） */
 	private final List beanPostProcessors = new ArrayList();
 
 	/** bean正式名称的别名map，key:别名; value:正式名称 */
