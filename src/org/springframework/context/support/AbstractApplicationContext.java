@@ -261,27 +261,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// register bean processor that intercept bean creation
 		registerBeanPostProcessors();
 
-		// initialize message source for this context
+		// 为当前上下文初始化message source
 		initMessageSource();
 
         // 【不理解】初始化事件监听器
 		// initialize event multicaster for this context
 		initApplicationEventMulticaster();
 
+		// 初始化指定上下文子类的其他特殊bean
 		// initialize other special beans in specific context subclasses
 		onRefresh();
 
-		// check for listener beans and register them
+		// 检查并注册监听器bean
 		refreshListeners();
 		*/
 		// TODO fzk end
 
-		// 初始化单例实例。这么晚才初始化，是为了让它们能访问到message source
+		// 初始化单例实例
+		// 这么晚才初始化，是为了让它们能访问到message source
 		beanFactory.preInstantiateSingletons();
 
 		// TODO fzk start
 		/*
-		// last step: publish corresponding event
+		// 最后一步：发布对应的事件
 		publishEvent(new ContextRefreshedEvent(this));
 		*/
         // TODO fzk end

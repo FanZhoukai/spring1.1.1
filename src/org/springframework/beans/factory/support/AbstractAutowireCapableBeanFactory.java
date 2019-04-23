@@ -97,6 +97,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private final Map disposableInnerBeans = Collections.synchronizedMap(new HashMap());
 
+	/** 被依赖的bean map，其中存储所有被其他bean依赖的bean。结构：[bean名称 : bean实例] */
 	private final Map dependentBeanMap = Collections.synchronizedMap(new HashMap());
 
 
@@ -290,6 +291,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeanCreationException(mergedBeanDefinition.getResourceDescription(), beanName, errorMessage, ex);
 		}
 
+		// 将bean注册为依赖于指定"dependsOn"的bean。
+		// 该信息用于容器关闭时，先销毁依赖的bean，再销毁这个bean。
 		// Register bean as dependent on specified "dependsOn" beans.
 		// This information is used on shutdown, to destroy dependent beans
 		// before the beans that they depend on.
@@ -1009,10 +1012,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Register a dependent bean for the given bean,
-	 * to be destroyed before the given bean is destroyed.
-	 * @param beanName the name of the bean
-	 * @param dependentBeanName the name of the dependent bean
+	 * 注册给定bean的依赖bean，用于在给定bean销毁时进行销毁
 	 */
 	protected final void registerDependentBean(String beanName, String dependentBeanName) {
 		synchronized (this.dependentBeanMap) {
