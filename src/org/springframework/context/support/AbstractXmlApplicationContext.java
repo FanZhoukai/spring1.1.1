@@ -39,6 +39,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractApplicationC
 	/**
 	 * 当前上下文的beanFactory
 	 * beanFactory用于创建bean，是IoC容器内全局的bean工厂
+	 * TODO 为什么ApplicationContext本身继承BeanFactory，又需要持有一个BeanFactory对象？
 	 */
 	private ConfigurableListableBeanFactory beanFactory;
 

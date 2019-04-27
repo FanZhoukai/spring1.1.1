@@ -188,9 +188,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
         // 创建bean实例
         if (mergedBeanDefinition.isSingleton()) {
-            // 【设计模式】双重检查的单例模式实例
+            // 【设计模式】双重检查的单例模式实例：第一重检查
             synchronized (this.singletonCache) {
-                // 双重检查的单例模式，锁内第二重检查
+                // 双重检查的单例模式，锁内第二重检
                 sharedInstance = this.singletonCache.get(beanName);
                 if (sharedInstance == null) {
                 	// 将临时对象放入缓存，以解决循环依赖问题
