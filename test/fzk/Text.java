@@ -1,6 +1,8 @@
 package fzk;
 
 import junit.framework.TestCase;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -18,7 +20,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class Text extends TestCase {
 
     /**
-     * 初始化IoC容器，并根据名称获取bean
+     * 1. 初始化IoC容器，并根据名称获取bean
+     * 2. 测试后置处理器、后置处理器的优先级
      */
     public void testIocHelloWorld() {
         ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");

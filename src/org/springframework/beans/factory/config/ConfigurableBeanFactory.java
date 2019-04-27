@@ -64,9 +64,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	void ignoreDependencyType(Class type);
 
 	/**
-	 * Add a new BeanPostPrcoessor that will get applied to beans created
-	 * by this factory. To be invoked during factory configuration.
-	 * @param beanPostProcessor the bean processor to register
+	 * 添加一个后置处理器，应用于当前factory创建的bean。
+	 * 在factory配置时被调用
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 

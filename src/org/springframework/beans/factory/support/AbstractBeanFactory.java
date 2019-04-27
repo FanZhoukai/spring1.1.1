@@ -348,6 +348,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return ignoreDependencyTypes;
 	}
 
+	/**
+	 * 添加后置处理器
+	 */
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		this.beanPostProcessors.add(beanPostProcessor);
 	}

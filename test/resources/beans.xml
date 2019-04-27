@@ -2,9 +2,14 @@
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+    <!-- 单例bean -->
     <bean name="helloService" class="fzk.HelloService">
         <property name="name">
             <value>fanzhoukai</value>
         </property>
     </bean>
+
+    <!-- 后置处理器 -->
+    <bean name="postProcessor" class="fzk.MyBeanPostProcessor"></bean>
+    <bean name="postProcessorLowPriority" class="fzk.MyBeanPostProcessorLowPriority"></bean>
 </beans>

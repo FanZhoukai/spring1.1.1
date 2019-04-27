@@ -257,10 +257,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// 调用所有bean的BeanFactoryPostProcessor类型的后置处理器
 		invokeBeanFactoryPostProcessors();
+		*/
+		// TODO fzk end
 
-		// register bean processor that intercept bean creation
+		// 注册bean后置处理器，拦截bean的创建过程
 		registerBeanPostProcessors();
 
+		// TODO fzk start
+		/*
 		// 为当前上下文初始化message source
 		initMessageSource();
 
@@ -319,18 +323,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Instantiate and invoke all registered BeanPostProcessor beans,
-	 * respecting explicit order if given.
-	 * <p>Must be called before any instantiation of application beans.
+	 * 实例化并调用所有注册的后置处理器bean，并排序。
+	 * 将在所有其他业务bean实例化之前被调用。
+	 *
+	 * 后置处理器也是bean，只是实现了BeanPostProcessor而已。
+	 * ApplicationContext的机制保证了：后置处理器bean将在业务bean之前被注册进IoC容器中（该方法注册后置处理器bean，
+	 * preInstantiateSingletons方法注册业务bean），因此才会保证，后置处理器应用于 “其他所有” bean的初始化进程。
 	 */
 	private void registerBeanPostProcessors() throws BeansException {
+		// 获取所有后置处理器bean名称（根据类型获取）
 		String[] beanNames = getBeanDefinitionNames(BeanPostProcessor.class);
 		if (beanNames.length > 0) {
+			// 实例化所有后置处理器bean，构造临时list
 			List beanProcessors = new ArrayList();
 			for (int i = 0; i < beanNames.length; i++) {
 				beanProcessors.add(getBean(beanNames[i]));
 			}
+			// 根据order排序
+			// order值越小，优先级越高（影响力越大）
+			// order值越小，排名越靠前，则越先被注册到后置处理器list中，在拦截bean实例时更先被执行，处于更外层的同心圆，影响范围更大
 			Collections.sort(beanProcessors, new OrderComparator());
+
+			// 添加进beanFactory的后置处理器list中
 			for (Iterator it = beanProcessors.iterator(); it.hasNext();) {
 				getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
 			}

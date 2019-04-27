@@ -19,19 +19,19 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
- * Allows for custom modification of new bean instances, e.g.
- * checking for marker interfaces or wrapping them with proxies.
+ * 允许对新创建的bean实例自定义修改。
+ * 比如检查标记接口，或把bean包装进代理中（AOP就是这么做的）
  *
- * <p>Application contexts can auto-detect BeanPostProcessor beans in their
- * bean definitions and apply them before any other beans get created.
- * Plain bean factories allow for programmatic registration of post-processors.
+ * ApplicationContext可以自动检测其中的后置处理器bean，并应用于其他所有bean的创建过程中。
+ * 允许后置处理器可以手动注入普通bean工厂中。
  *
- * <p>Typically, post-processors that populate beans via marker interfaces
- * or the like will implement postProcessBeforeInitialization, and post-processors
- * that wrap beans with proxies will normally implement postProcessAfterInitialization.
+ * 常见用法：
+ * 通常，通过标记接口来给属性赋值的后置处理器会实现postProcessBeforeInitialization；
+ * 使用代理包装bean的后置处理器，通常需要实现postProcessAfterInitialization。
  *
- * @author Juergen Hoeller
- * @since 10.10.2003
+ *
+ * （由于后置处理器对应用于 “任何其他” bean上的，所以需要通过接口来分组，不同的组有不同的处理方式）
+ *
  * @see ConfigurableBeanFactory#addBeanPostProcessor
  * @see BeanFactoryPostProcessor
  */
