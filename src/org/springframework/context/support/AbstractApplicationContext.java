@@ -323,7 +323,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * 实例化并调用所有注册的后置处理器bean，并排序。
+	 * 实例化所有注册的后置处理器bean，并排序。
 	 * 将在所有其他业务bean实例化之前被调用。
 	 *
 	 * 后置处理器也是bean，只是实现了BeanPostProcessor而已。
@@ -340,8 +340,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				beanProcessors.add(getBean(beanNames[i]));
 			}
 			// 根据order排序
-			// order值越小，优先级越高（影响力越大）
-			// order值越小，排名越靠前，则越先被注册到后置处理器list中，在拦截bean实例时更先被执行，处于更外层的同心圆，影响范围更大
+			// order值越小，优先级越高
+			// order值越小，排名越靠前，则越先被注册到后置处理器list中，在拦截bean实例时更先被执行
+			// 注意，后置处理器和AOP都可以实现Ordered接口，但二者顺序不同：
+			// 后置处理器    AOP
+			// order=1      order=1
+			// order=2      order=2
+			// init         invoke
+			// order=1      order=2
+			// order=2      order=1
+			//
+			// 后置处理器是顺序执行的，无论初始化前还是初始化后，都按order从小到大顺序执行；
+			// 而AOP采用一种同心圆的方式，order值越小，处于同心圆的更外圈，影响力越大。
 			Collections.sort(beanProcessors, new OrderComparator());
 
 			// 添加进beanFactory的后置处理器list中
