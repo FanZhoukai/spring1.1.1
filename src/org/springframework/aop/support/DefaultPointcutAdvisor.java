@@ -25,6 +25,13 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 
 /**
+ * pointcut驱动的Advisor实现类。
+ * 是最通用的Advisor，基本所有需求都可以通过它来实现。
+ * 支持任意类型的pointcut和advice，除introductions外。
+ *
+ * 通常情况下，不需要继承这个类，也不需要自己实现Advisor。
+ * （意思是说，向其中注入pointcut和advise就可以直接拿来用了）
+ *
  * Convenient pointcut-driven advisor implementation.
  *
  * <p>This is the most commonly used Advisor implementation. It can be

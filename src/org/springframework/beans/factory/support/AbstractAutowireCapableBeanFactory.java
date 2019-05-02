@@ -175,10 +175,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	/**
+	 * 执行初始化之后的后置处理器
+	 */
 	public Object applyBeanPostProcessorsAfterInitialization(Object bean, String name) throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + name + "'");
-		}
 		Object result = bean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
@@ -230,15 +230,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// 初始化bean
 			errorMessage = "Instantiation of bean failed";
 
-			// TODO fzk 其他情况，暂时不管
-			/*if (mergedBeanDefinition.getFactoryMethodName() != null)  {
+			// TODO fzk 其他情况，该看看了，AOP没有这块代码就跑不起来。看懂了再把TODO去掉
+			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
 				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
 			}
 			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
 					mergedBeanDefinition.hasConstructorArgumentValues() )  {
 				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
 			}
-			else*/ // TODO fzk end
+			else // TODO fzk end
 			{
 				// 使用无参构造方法，创建bean实例，并包装在BeanWrapper类中返回
 				Object beanInstance = this.instantiationStrategy.instantiate(mergedBeanDefinition, beanName, this);

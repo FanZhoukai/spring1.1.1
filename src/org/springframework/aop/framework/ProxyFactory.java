@@ -21,23 +21,22 @@ import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.support.AopUtils;
 
 /**
- * Factory for AOP proxies for programmatic use, rather than via a bean
- * factory. This class provides a simple way of obtaining and configuring
- * AOP proxies in code.
- * @since 14-Mar-2003
- * @author Rod Johnson
+ * AOP代理工厂，编程式使用，而非通过bean factory使用。
+ * 提供了一种简单的、利用代码的，获取、配置AOP代理方式。
+ *
+ * 啥叫代理工厂？就是织入器。利用该工厂，将横切逻辑织入到target对象中，并返回。核心方法就是getProxy，获取代理后对象。
  */
 public class ProxyFactory extends AdvisedSupport {
 
 	/**
-	 * Create a new ProxyFactory.
+	 * 创建一个ProxyFactory
 	 */
 	public ProxyFactory() {
 	}
 
 	/**
-	 * Create a new ProxyFactory.
-	 * Proxy all interfaces of the given target.
+	 * 创建一个ProxyFactory
+	 * 代理给定目标对象的所有接口
 	 */
 	public ProxyFactory(Object target) throws AopConfigException {
 		if (target == null) {
@@ -56,10 +55,8 @@ public class ProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Create new proxy according to the settings in this factory.
-	 * Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove "interceptors"
-	 * @return Object
+	 * 根据当前工厂中的配置信息，创建新的代理对象。
+	 * 可以被重复调用。如果已经添加或移除了接口，效果可能会不同。可以添加或删除拦截器。
 	 */
 	public Object getProxy() {
 		AopProxy proxy = createAopProxy();

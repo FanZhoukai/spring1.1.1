@@ -107,16 +107,17 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given object implements as array,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
+	 * 获取给定对象实现的所有接口，以数组形式返回。
+	 * 包括父类实现的接口（递归查找）
+	 *
+	 * @param object 想要分析接口的对象
+	 * @return 给定对象实现的所有接口数组
 	 */
 	public static Class[] getAllInterfaces(Object object) {
 		List interfaces = getAllInterfacesAsList(object);
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
 	}
-	
+
 	/**
 	 * @return a string of form com.foo.Bar,com.foo.Baz
 	 */
@@ -134,10 +135,11 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given object implements as List,
-	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
+	 * 获取给定对象实现的所有接口，以数组形式返回。
+	 * 包括父类实现的接口（递归查找）
+	 *
+	 * @param object 想要分析接口的对象
+	 * @return 给定对象实现的所有接口数组
 	 */
 	public static List getAllInterfacesAsList(Object object) {
 		List interfaces = new ArrayList();
@@ -151,7 +153,7 @@ public abstract class AopUtils {
 		}
 		return interfaces;
 	}
-	
+
 	/**
 	 * Is the given method declared on one of these interfaces?
 	 * @param method method to check

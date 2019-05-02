@@ -10,6 +10,18 @@
     </bean>
 
     <!-- 后置处理器 -->
-    <bean name="postProcessor" class="fzk.MyBeanPostProcessor"></bean>
-    <bean name="postProcessorLowPriority" class="fzk.MyBeanPostProcessorLowPriority"></bean>
+    <!--<bean name="postProcessor" class="fzk.MyBeanPostProcessor"></bean>
+    <bean name="postProcessorLowPriority" class="fzk.MyBeanPostProcessorLowPriority"></bean>-->
+
+    <!-- AOP相关 -->
+    <!-- 核心bean：将织入器和IoC结合起来，是一个后置处理器，自动查找所有Advisor，在后置处理器部分完成代理 -->
+    <bean id="autoProxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
+    <!-- Advisor，包括横切逻辑和切面 -->
+    <bean id="advisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <constructor-arg>
+            <ref bean="myAdvice"></ref>
+        </constructor-arg>
+    </bean>
+    <!-- 横切逻辑 -->
+    <bean id="myAdvice" class="fzk.aop.MyAroundAdvice"></bean>
 </beans>

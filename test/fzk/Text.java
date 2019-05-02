@@ -1,8 +1,10 @@
 package fzk;
 
+import fzk.aop.MyAroundAdvice;
 import junit.framework.TestCase;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -21,11 +23,22 @@ public class Text extends TestCase {
 
     /**
      * 1. 初始化IoC容器，并根据名称获取bean
-     * 2. 测试后置处理器、后置处理器的优先级
+     * 2. 自定义后置处理器（baens.xml，将后置处理器相关代码解开注释）
+     * 3. AOP织入横切逻辑
      */
     public void testIocHelloWorld() {
         ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         HelloService helloService = (HelloService) context.getBean("helloService");
         helloService.sayHello();
     }
+
+	/**
+	 * 单独测试ProxyFactory(织入器)功能（脱离IoC）
+	 */
+	public void testProxyFactory() {
+		ProxyFactory weaver = new ProxyFactory(new HelloService());
+		weaver.addAdvisor(new DefaultPointcutAdvisor(new MyAroundAdvice()));
+		HelloService proxyObject = (HelloService) weaver.getProxy();
+		proxyObject.sayHello();
+	}
 }
