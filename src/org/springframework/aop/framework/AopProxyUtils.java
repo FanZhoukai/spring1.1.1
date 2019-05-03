@@ -23,15 +23,15 @@ import java.util.Arrays;
 import org.aopalliance.aop.AspectException;
 
 /**
- * Miscellaneous utilities for AOP proxies.
- * @author Rod Johnson
+ * AOP代理的各种工具
  */
 public abstract class AopProxyUtils {
 	
 	/**
-	 * Get complete set of interfaces to proxy. This will always add the Advised interface
-	 * unless the AdvisedSupport's "opaque" flag is true.
-	 * @return the complete set of interfaces to proxy
+	 * 获取代理的完整接口集合。
+	 * 总会加上Advised接口（因为AopProxyFactory规定代理对象必须实现此接口），除非opaque配置为true
+	 *
+	 * @return 代理的完整接口集合
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		// Won't include Advised, which may be necessary.

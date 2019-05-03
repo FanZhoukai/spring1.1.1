@@ -69,7 +69,7 @@ public class ProxyConfig implements Serializable {
 	 */
 	private boolean frozen;
 	
-	/** Factory used to create AopProxy instances */
+	/** 用于创建AOP代理对象实例的工厂（即织入器） */
 	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 
 	
@@ -82,6 +82,7 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * 是否直接代理目标类，和所有接口
 	 * Return whether to proxy the target class directly as well as any interfaces.
 	 */
 	public boolean getProxyTargetClass() {
@@ -89,31 +90,25 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Set whether proxies should perform agressive optimizations.
-	 * The exact meaning of "agressive optimizations" will differ
-	 * between proxies, but there is usually some tradeoff. 
-	 * <p>For example, optimization will usually mean that advice changes won't
-	 * take effect after a proxy has been created. For this reason, optimization
-	 * is disabled by default. An optimize value of true may be ignored
-	 * if other settings preclude optimization: for example, if exposeProxy
-	 * is set to true and that's not compatible with the optimization.
-	 * <p>For example, CGLIB-enhanced proxies may optimize out.
-	 * overriding methods with no advice chain. This can produce 2.5x
-	 * performance improvement for methods with no advice.
-	 * <p><b>Warning:</b> Setting this to true can produce large performance
-	 * gains when using CGLIB (also set proxyTargetClass to true), so it's
-	 * a good setting for performance-critical proxies. However, enabling this
-	 * will mean that advice cannot be changed after a proxy has been obtained
-	 * from this factory.
-	 * @param optimize whether to enable agressive optimizations. 
-	 * Default is false.
+	 * 设置代理是否应该执行侵略性优化。
+	 * “侵略性优化”的确切含义在不同的代理之间会有所不同，但是通常会有一些权衡。
+	 * 例如，优化通常意味着在创建代理之后advice更改不会生效。（即为了创建代理的速度，放弃了后续修改advice的可能）
+	 * 由于这个原因，optimize默认是false。
+	 *
+	 * 如果其他设置禁止优化，则optimize=true可以被忽略：
+	 * 例如，如果将exposeProxy设置为true，而这与optimize不兼容，则可以忽略true。
+	 * 例如，cglib增强的动态代理可以进行优化，覆盖没有通知链的方法。对于没有advice的方法，这可以产生2.5倍的性能提升。
+	 * 警告:当使用CGLIB(也将proxyTargetClass设置为true)时，将该值设置为true可以获得较大的性能收益，因此这对于性能关键的代理来说是一个很好的设置。
+	 * 然而，启用此功能将意味着在从该工厂获得代理之后不能更改advice。
+	 *
+	 * @param optimize 是否启用侵入式优化——优化后无法更改advice。默认为false
 	 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;
 	}
 
 	/**
-	 * Return whether proxies should perform agressive optimizations.
+	 * 是否启用侵入式优化——优化后无法更改advice
 	 */
 	public boolean getOptimize() {
 		return this.optimize;
@@ -167,7 +162,7 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return the AopProxyFactory that this ProxyConfig uses.
+	 * 获取当前ProxyConfig对象使用的织入器
 	 */
 	public AopProxyFactory getAopProxyFactory() {
 		return this.aopProxyFactory;

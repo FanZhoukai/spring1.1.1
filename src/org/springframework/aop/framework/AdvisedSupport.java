@@ -89,12 +89,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	private Advisor[] advisorArray = new Advisor[0];
 
-	/** Interfaces to be implemented by the proxy */
+	/** 代理对象需要实现的接口 */
 	private Set interfaces = new HashSet();
 
 	/**
-	 * Set to true when the first AOP proxy has been created, meaning that we must
-	 * track advice changes via onAdviceChange() callback.
+	 * 当第一个AOP代理被创建时设置为true
+	 * 意味着必须通过onAdviceChange()回调方法来追踪advice的变化
 	 */
 	private transient boolean isActive;
 
@@ -196,8 +196,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Add a new proxied interface.
-	 * @param newInterface additional interface to proxy
+	 * 添加代理接口
+	 * @param newInterface 额外要代理的接口
 	 */
 	public void addInterface(Class newInterface) {
 		this.interfaces.add(newInterface);
@@ -543,7 +543,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			}
 		}
 	}
-	
+
+	/**
+	 * 激活
+	 */
 	private void activate() {
 		this.isActive = true;
 		for (int i = 0; i < this.listeners.size(); i++) {
@@ -552,10 +555,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
-	 * create an AOP proxy with this as an argument.
+	 * 子类应调用此方法，来获取新的AOP代理。
+	 * 子类不应该使用this当做参数来创建AOP代理。
 	 */
 	protected synchronized AopProxy createAopProxy() {
+		// 激活
 		if (!this.isActive) {
 			activate();
 		}

@@ -17,18 +17,18 @@
 package org.springframework.aop;
 
 /**
- * A TargetSource is used to obtain the current "target" of  an AOP invocation,
- * which will be invoked via reflection if no around advice chooses to end the
- * interceptor chain itself.
+ * TargetSource用于获取当前AOP调用的目标对象。
+ * 如果没有环绕advice来结束拦截器链，将使用反射来调用目标对象。
  *
- * <p>If a TargetSource is "static", it will always return the same target,
- * allowing optimizations in the AOP framework. Dynamic target sources can
- * support pooling, hot swapping, etc.
+ * 静态TargetSource总会返回相同的目标对象，运行AOP框架内的优化。
+ * 动态TargetSource支持池化，热插拔(hot swapping)等等特性。
  *
- * <p>Application developers don't usually need to work with TargetSources
- * directly: This is an AOP framework interface.
+ * 解释下：
+ * 池化：是指把目标对象放在一个池中，见CommonsPoolTargetSource；
+ * 热插拔：是指能动态无感知切换目标对象的能力，见HotSwappableTargetSource
  *
- * @author Rod Johnson
+ *
+ * 应用开发者通常不需要直接使用TargetSource，这是AOP框架的内部接口。
  */
 public interface TargetSource {
 
@@ -46,12 +46,16 @@ public interface TargetSource {
 	 * @return whether the target is immutable.
 	 */
 	boolean isStatic();
-	
+
 	/**
+	 * 获取一个目标实例。
+	 * 在AOP框架调用目标对象的方法前，该方法会立即被调用。
+	 * <p>
 	 * Return a target instance. Invoked immediately before the
 	 * AOP framework calls the "target" of an AOP method invocation.
-	 * @return the target object, whicch contains the joinpoint
-	 * @throws Exception if the target object can't be resolved
+	 *
+	 * @return 目标对象，包含joinpoint
+	 * @throws Exception 如果目标对象无法被解析
 	 */
 	Object getTarget() throws Exception;
 	

@@ -17,15 +17,20 @@
 package org.springframework.aop.framework;
 
 /**
- * Simple implementation of AopProxyFactory
- * @author Rod Johnson
+ * AopProxyFactory的简单实现
  */
 public class DefaultAopProxyFactory implements AopProxyFactory {
 
 	/**
-	 * @see org.springframework.aop.framework.AopProxyFactory#createAopProxy(org.springframework.aop.framework.AdvisedSupport)
+	 * 创建AOP代理对象
+	 * 使用cglib动态代理/jdk动态代理两种方式
+	 *
+	 * @param advisedSupport AOP配置
+	 * @return AOP代理对象
 	 */
 	public AopProxy createAopProxy(AdvisedSupport advisedSupport) throws AopConfigException {
+		// 使用cglib的条件：
+		// 启用优化 OR 直接代理目标类/接口 OR 代理对象不需要继承任何接口 TODO fzk 这里不懂
 		boolean useCglib = advisedSupport.getOptimize() || advisedSupport.getProxyTargetClass() || advisedSupport.getProxiedInterfaces().length == 0;
 		if (useCglib) {
 			return CglibProxyFactory.createCglibProxy(advisedSupport);

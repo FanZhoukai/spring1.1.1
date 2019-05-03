@@ -46,6 +46,8 @@ import org.springframework.aop.TargetSource;
  * are serializable (meaning both Advices and Pointcuts)
  * and the TargetSource is serializable.
  *
+ * 本身是InvocationHandler实现类，因此充当了jdk动态代理中的参数。
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see java.lang.reflect.Proxy
@@ -183,8 +185,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	}
 
 	/**
-	 * Create a new Proxy object for the given object, proxying
-	 * the given interface. Uses the given class loader.
+	 * 创建代理对象
+	 * 代理给定接口，使用指定的类加载器
 	 */
 	public Object getProxy(ClassLoader cl) {
 		if (logger.isDebugEnabled()) {
